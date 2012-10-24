@@ -27,7 +27,6 @@
 		analyser.connect(javascriptNode);
 
 		sourceNode.connect(context.destination);
-		//javascriptNode.onaudioprocess();
 	}
 
 
@@ -53,7 +52,6 @@
 		analyser.fftSize = 2048;
 
 		// create a buffer source node
-		//sourceNode = context.createBufferSource();
 		connectMic();
 	}
 
@@ -125,8 +123,6 @@
 		drawSpectrum(array);
 
 	}
-
-	//loadSound("raven.mp3");
 
 </script>
 </html>
