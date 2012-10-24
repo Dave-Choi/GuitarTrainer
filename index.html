@@ -57,32 +57,6 @@
 		connectMic();
 	}
 
-	// load the specified sound
-/*
-	function loadSound(url) {
-		var request = new XMLHttpRequest();
-		request.open('GET', url, true);
-		request.responseType = 'arraybuffer';
-
-		// When loaded decode the data
-		request.onload = function() {
-
-			// decode the data
-			context.decodeAudioData(request.response, function(buffer) {
-				// when the audio is decoded play the sound
-				playSound(buffer);
-			}, onError);
-		}
-		request.send();
-	}
-
-	function playSound(buffer) {
-		console.log("adsf");
-		//sourceNode.buffer = buffer;
-		//sourceNode.noteOn(0);
-	}
-	*/
-
 	// log if an error occurs
 	function onError(e) {
 		console.log(e);
@@ -93,22 +67,6 @@
 		var spikeWidth = ctx.canvas.width/len;
 		for ( var i = 0; i < (array.length); i++ ){
 			var value = array[i];
-			/*
-			var maxAmp = maxAmplitudes[i];
-			if(maxAmp){
-				if(maxAmp < value){
-					maxAmplitudes[i] = value;
-				}
-				else{
-					value = maxAmp;
-				}
-				//Slowly decay the spikes, to get a feel for shape, without them being permanent.
-				maxAmplitudes[i] *= .98;
-			}
-			else{
-				maxAmplitudes[i] = value;
-			}
-			*/
 			ctx.fillRect(i*spikeWidth,700-value,spikeWidth,700);
 			var freq = i*context.sampleRate/analyser.fftSize;
 			if(i%50 == 0){
@@ -147,7 +105,6 @@
 	gradient.addColorStop(0.75,'#ff0000');
 	gradient.addColorStop(0.25,'#ffff00');
 	gradient.addColorStop(0,'#ffffff');
-
 
 	// load the sound
 	setupAudioNodes();
