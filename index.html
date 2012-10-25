@@ -9,7 +9,7 @@
 </head>
 <body>
 <div id="debug"></div>
-<canvas id="canvas" width="1500" height="700" style="display: block;"></canvas>
+<canvas id="canvas" width="1250" height="700" style="display: block;"></canvas>
 </body>
 <script type="text/javascript" src="jquery-1.8.0.min.js"></script>
 <script type="text/javascript">
@@ -60,15 +60,21 @@
 		console.log(e);
 	}
 
-	function drawSpectrum(array) {
-		var len = array.length;
-		var spikeWidth = ctx.canvas.width/len;
-		for ( var i = 0; i < (array.length); i++ ){
+	function drawSpectrum(array, lowFreq, highFreq){
+		var i, len = array.length;
+		var lowIndex = Math.floor(lowFreq*analyser.fftSize/context.sampleRate);
+		var highIndex = Math.floor(highFreq*analyser.fftSize/context.sampleRate);
+		var legendInterval = (highIndex-lowIndex)/10;
+		var spikeWidth = ctx.canvas.width/(highIndex-lowIndex);
+		//console.log(context.sampleRate + " - " + analyser.fftSize);
+		// 44100 - 2048
+		for (i=lowIndex; i<highIndex; i++){
+			var x = i * spikeWidth;
 			var value = array[i];
-			ctx.fillRect(i*spikeWidth,700-value,spikeWidth,700);
+			ctx.fillRect(x, 700-value, spikeWidth, 700);
 			var freq = i*context.sampleRate/analyser.fftSize;
-			if(i%50 == 0){
-				ctx.fillText(Math.floor(freq), i*spikeWidth, 350);
+			if( (i%(Math.floor(legendInterval)) == 0) || (i == highIndex) ){
+				ctx.fillText(Math.floor(freq), x, 350);
 			}
 		}
 	};
@@ -120,7 +126,7 @@
 
 		// set the fill style
 		ctx.fillStyle=gradient;
-		drawSpectrum(array);
+		drawSpectrum(array, 20, 1400);
 
 	}
 
