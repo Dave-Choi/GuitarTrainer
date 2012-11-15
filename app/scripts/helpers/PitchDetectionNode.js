@@ -71,7 +71,18 @@ GuitarTrainer.PitchDetectionNode = Ember.Object.extend({
 		this.setupNodes(context);
 		var firstNode = this.nodes[0];
 		this.source.connect(firstNode);
-	}.observes('source')
+	}.observes("source"),
+
+	detectFrequency: function(frequency, threshold){
+		/*
+			Synchonous, super-naive frequency detection, based on what's
+			currently in the FFT spectrum.
+		*/
+		var spectrum = this.fft.spectrum;
+		var binIndex = Math.floor(frequency * this.binCount / this.sampleRate);
+		console.log(binIndex + " - " + spectrum[binIndex]);
+		return spectrum[binIndex] >= threshold;
+	}
 });
 
 
@@ -150,3 +161,7 @@ GuitarTrainer.VisualPitchDetectionNode = GuitarTrainer.PitchDetectionNode.extend
 	var pitchDetectionNode = GuitarTrainer.VisualPitchDetectionNode.create({"canvas": canvas});
 
 	connectMic();
+
+	$("#checkOpenA").click(function(){
+		console.log(pitchDetectionNode.detectFrequency(110, 0.01));
+	});
