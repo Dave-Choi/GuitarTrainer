@@ -10,23 +10,37 @@
 <body>
 <div id="debug"></div>
 <canvas id="canvas" width="1250" height="700" style="display: block;"></canvas>
+<input id="snapshotButton" type="button" value="Snapshot" />
 </body>
 <script type="text/javascript" src="jquery-1.8.0.min.js"></script>
-<script type="text/javascript">
+<script src="dsp.js"></script>
+<script>
 	function debug(msg){
 		$("#debug").html(msg);
+	}
+
+	function filledArray(value, count){
+		var i;
+		var array = [];
+		for(i=count-1; i>=0; i--){
+			array[i] = value;
+		}
+		return array;
 	}
 
 	function micSuccess(stream){
 		sourceNode = context.createMediaStreamSource(stream);
 		console.log("Mic connection");
-		sourceNode.connect(hp);
-		hp.connect(lp);
-		lp.connect(analyser);
+		//sourceNode.connect(hp);
+		//hp.connect(lp);
+		//lp.connect(javascriptNode);
 
-		analyser.connect(javascriptNode);
+		//analyser.connect(javascriptNode);
 
-		sourceNode.connect(context.destination);
+		sourceNode.connect(javascriptNode);
+
+		//No connection to destination to prevent audio feedback during debugging.
+		//sourceNode.connect(context.destination);
 	}
 
 
@@ -45,12 +59,6 @@
 		// connect to destination, else it isn't called
 		javascriptNode.connect(context.destination);
 
-
-		// setup a analyzer
-		analyser = context.createAnalyser();
-		analyser.smoothingTimeConstant = 0.3;
-		analyser.fftSize = 2048;
-
 		// create a buffer source node
 		connectMic();
 	}
@@ -61,21 +69,17 @@
 	}
 
 	function drawSpectrum(array, lowFreq, highFreq){
+		//debug(toString(array));
 		var i, len = array.length;
-		var lowIndex = Math.floor(lowFreq*analyser.fftSize/context.sampleRate);
-		var highIndex = Math.floor(highFreq*analyser.fftSize/context.sampleRate);
-		var legendInterval = (highIndex-lowIndex)/10;
-		var spikeWidth = ctx.canvas.width/(highIndex-lowIndex);
+		var spikeWidth = ctx.canvas.width/(len);
+		var canvasHeight = ctx.canvas.height;
 		//console.log(context.sampleRate + " - " + analyser.fftSize);
 		// 44100 - 2048
-		for (i=lowIndex; i<highIndex; i++){
+		for (i=0; i<len; i++){
 			var x = i * spikeWidth;
 			var value = array[i];
-			ctx.fillRect(x, 700-value, spikeWidth, 700);
-			var freq = i*context.sampleRate/analyser.fftSize;
-			if( (i%(Math.floor(legendInterval)) == 0) || (i == highIndex) ){
-				ctx.fillText(Math.floor(freq), x, 350);
-			}
+			var mag = value * 100000;
+			ctx.fillRect(x, canvasHeight, spikeWidth, -mag*mag);
 		}
 	};
 
@@ -91,9 +95,10 @@
 	hp.frequency = 20;
 	hp.Q = 0.1;
 
-	var audioBuffer;
+	var sampleBuffer = filledArray(0, 8192);
+
 	var sourceNode;
-	var analyser;
+	var fft = new FFT(8192, 44100);
 	var javascriptNode;
 
 	var maxAmplitudes = [];
@@ -114,21 +119,31 @@
 	setupAudioNodes();
 
 		// when the javascript node is called
-	// we use information from the analyzer node
+	// we use information from the fft
 	// to draw the volume
-	javascriptNode.onaudioprocess = function() {
-		// get the average for the first channel
-		var array =  new Uint8Array(analyser.frequencyBinCount);
-		analyser.getByteFrequencyData(array);
+	javascriptNode.onaudioprocess = function(e){
+		var inputBuffer = e.inputBuffer.getChannelData(0);
+		sampleBuffer.splice(0, inputBuffer.length);
+		//concat doesn't work normally, because inputBuffer is a float32 array
+		//sampleBuffer = sampleBuffer.concat(inputBuffer);
+		sampleBuffer = sampleBuffer.concat.apply(sampleBuffer, inputBuffer);
+
+		fft.forward(sampleBuffer);
+		var array = fft.spectrum;
 
 		// clear the current state
 		ctx.clearRect(0, 0, ctx.canvas.width, 700);
 
 		// set the fill style
 		ctx.fillStyle=gradient;
+
 		drawSpectrum(array, 20, 1400);
 
 	}
+
+	$("#snapshotButton").click(function(){
+		console.log(fft.spectrum);
+	});
 
 </script>
 </html>

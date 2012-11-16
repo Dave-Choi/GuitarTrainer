@@ -73,6 +73,10 @@ GuitarTrainer.PitchDetectionNode = Ember.Object.extend({
 		this.source.connect(firstNode);
 	}.observes("source"),
 
+	binForFreq: function(freq){
+		return Math.floor(freq * this.binCount / this.sampleRate);
+	},
+
 	detectFrequency: function(frequency, threshold){
 		/*
 			Synchonous, super-naive frequency detection, based on what's
@@ -94,35 +98,79 @@ GuitarTrainer.PitchDetectionNode = Ember.Object.extend({
 	using the this._super() call to update the fft spectrum and rendering from there seemed
 	like the simplest way to hook in the functionality.
 */
-
 GuitarTrainer.VisualPitchDetectionNode = GuitarTrainer.PitchDetectionNode.extend({
+	//	Frequency bounds for rendering
+	highFreq: 1200,
+	lowFreq: 80,
+
+	// Properties for highlighting frequencies of interest
+	rootFreq: 82.407,
+	keyFreqs: function(){
+		var freqs = [];
+		// Set as many as will fit in the frequency bounds
+		var root = this.get("rootFreq");
+		var base = Math.pow(2, 1/12);
+		var highBound = this.get("highFreq");
+		while(root <= highBound){
+			freqs.push(root);
+			root *= base;
+		}
+		return freqs;
+	}.property("rootFreq"),
+
+	keyBins: function(){
+		var bins = [];
+		var freqs = this.get("keyFreqs");
+		var i, len = freqs.length;
+		for(i=0; i<len; i++){
+			bins.push(this.binForFreq(freqs[i]));
+		}
+		return bins;
+	}.property("keyFreqs"),
+
+	highBin: function(){
+		return this.binForFreq(this.highFreq);
+	}.property("highFreq"),
+	lowBin: function(){
+		return this.binForFreq(this.lowFreq);
+	}.property("lowFreq"),
+
 	canvas: null,
 	ctx: function(){
 		return this.canvas.getContext("2d");
 	}.property("canvas"),
 
-	gradient: function(){
-		var ctx = this.get("ctx");
-		var gradient = ctx.createLinearGradient(0,0,0,300);
-		gradient.addColorStop(1,'#6699ff');
-		gradient.addColorStop(0.75,'#ff0000');
-		gradient.addColorStop(0.25,'#ffff00');
-		gradient.addColorStop(0,'#ffffff');
-		return gradient;
-	}.property("ctx"),
-
 	drawSpectrum: function(array){
 		var ctx = this.get("ctx");
 		ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-		ctx.fillStyle = this.get("gradient");
-		var i, len = array.length;
-		var spikeWidth = ctx.canvas.width/(len);
+		ctx.fillStyle = "black";
+
+		var i = this.get("lowBin"), len = this.get("highBin");
+		var spikeWidth = ctx.canvas.width/(len-i);
 		var canvasHeight = ctx.canvas.height;
-		for (i=0; i<len; i++){
+
+		//console.log(len - i + " bins, " + spikeWidth + " wide spikes");
+
+		var keyBins = this.get("keyBins");
+		var gradient = this.get("gradient");
+		/*
+			The detection threshold is currently set to 0.01, so scale
+			the spike height so that a value of 0.01 hits the top of the canvas
+
+			canvasHeight / threshold = spikeHeight / value
+			spikeHeight = canvasHeight * value / threshold
+		*/
+		var heightCoeff = canvasHeight / 0.01;
+		for (; i<len; i++){
 			var x = i * spikeWidth;
 			var value = array[i];
-			var mag = value * 100000;
-			ctx.fillRect(x, canvasHeight, spikeWidth, -mag*mag);
+			//var mag = value * 10000;
+			var spikeHeight = value * heightCoeff;
+			if(keyBins.indexOf(i) != -1){
+				ctx.fillStyle = "red";
+			}
+			ctx.fillRect(x, canvasHeight, spikeWidth, -spikeHeight);
+			ctx.fillStyle = "black";
 		}
 	},
 
@@ -156,7 +204,6 @@ GuitarTrainer.VisualPitchDetectionNode = GuitarTrainer.PitchDetectionNode.extend
 	canvas.width = 1250;
 	canvas.height = 700;
 	document.getElementById("mainThing").appendChild(canvas);
-
 
 	var pitchDetectionNode = GuitarTrainer.VisualPitchDetectionNode.create({"canvas": canvas});
 
