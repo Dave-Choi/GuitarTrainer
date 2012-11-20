@@ -202,7 +202,7 @@ GuitarTrainer.VisualPitchDetectionNode = GuitarTrainer.PitchDetectionNode.extend
 	var canvas = document.createElement("canvas");
 	canvas.id = "canvas";
 	canvas.width = 1250;
-	canvas.height = 700;
+	canvas.height = 100;
 	document.getElementById("mainThing").appendChild(canvas);
 
 	var pitchDetectionNode = GuitarTrainer.VisualPitchDetectionNode.create({"canvas": canvas});
