@@ -32,7 +32,15 @@ DMusic.Note = Ember.Object.extend({
 		"G#/Ab": 11, "G#": 11, "Ab": 11
 	},
 
-	// Frequency lookup table, for expediency (note, octave)
+	noteIndex: function(){
+		return this.get("noteIndices")[this.get("name")];
+	}.property("name"),
+
+	/*
+		Frequency lookup table, for expediency using frequencyTable[note, octave]
+		Goes from octave 0 to 10.
+		This is calculated based on concert pitch (A440), rather than scientific (C256)
+	*/
 	frequencyTable: [
 		[27.50, 55.0, 110,0, 220.00, 440.0, 880.0, 1760.0, 3520.0, 7040.0, 14080.0, 28160.0], // A
 		[29.135, 58.270, 116.54, 233.08, 466.16, 932.33, 1864.7, 3729.3, 7458.6, 14917.2, 29834.5], // A#/Bb
@@ -49,74 +57,82 @@ DMusic.Note = Ember.Object.extend({
 	],
 
 	frequency: function(){
-		//This is calculated based on concert pitch (A440), rather than scientific (C256)
-		var noteIndex = this.get("noteIndices")[this.get("note")];
-		return this.get("frequencyTable")[noteIndex][this.get("octave")];
-	}.property("note", "octave"),
+		var noteIndex = this.get("noteIndices")[this.get("name")];
+		var octave = this.get("octave");
+
+		var frequencyTable = this.get("frequencyTable");
+		if(octave >= 0 && octave < 11){
+			return frequencyTable[noteIndex][this.get("octave")];
+		}
+		var base = frequencyTable[noteIndex][0];
+		// If people need special case table expansion, they can add it to their application.
+		// It's possible the whole table is overkill.  Multiplying a root by powers of 2 is very fast.
+		return base * Math.pow(2, octave);
+	}.property("name", "octave"),
 
 	sharpenedNoteName: function(times){
 		// Returns the name of the note after sharpening by a semitone per times
 		var noteNames = this.get("noteNames");
 		var noteIndices = this.get("noteIndices");
+
 		var i = (noteIndices[this.get("name")] + times) % noteNames.length;
+		// JavaScript's % operator always returns a result with the same sign as the dividend, so i can be negative.
+		if(i < 0){
+			i = noteNames.length + i;
+		}
 		return noteNames[i];
 	},
 
-	sharpen: function(times){
-		// Modify this note to the sharpened note
-		var newNoteName = this.sharpenedNoteName(times);
-		this.set("name", newNoteName);
+	flattenedNoteName: function(times){
+		return this.sharpenedNoteName(-times);
 	},
 
-	sharpDifference: function(note2){
-		/*
-			Returns how many times you'd have to sharpen this note to get to note2
-			in semitone steps.
-		*/
-		var noteIndices = this.get("noteIndices");
-		var i1 = noteIndices[this.get("name")], i2 = noteIndices[note2.get("name")];
-		var numNotes = this.get("noteNames").length;
-		return (i1 <= i2) ? (i2 - i1) : (numNotes - i1 + i2);
-	},
-
-	flatDifference: function(note2){
-		/*
-			Returns how many times you'd have to flatten this note to get to note2
-			in semitone steps.
-		*/
-		var noteIndices = this.get("noteIndices");
-		var i1 = noteIndices[this.get("name")], i2 = noteIndices[note2.get("name")];
-		var numNotes = this.get("noteNames").length;
-		return (i1 < i2) ? (numNotes - i2 + i1) : (i1 - i2);
-	},
-
-	shortestDifference: function(note2){
-		/*
-			Returns the shortest interval between two notes as a signed integer
-			representing semitones.
-
-			If the returned value is negative, it means the shortest distance is
-			by flattening the note.
-
-			If positive, it means the shortest distance is by sharpening the note.
-
-			If B is checked against A, for example,
-			the shortest interval is -2 (flattened two semitones),
-			whereas by sharpening, the difference would be 10.
-
-			If the notes are a half octave apart, it returns 6, rather than -6
-
-			The absolute value of the returned value should always be
-			less than or equal to half the number of notes (6).
-		*/
-
-		var noteIndices = this.get("noteIndices");
-		var sharpDist = this.sharpDifference(note2);
-		var flatDist = this.flatDifference(note2);
-		if(sharpDist <= flatDist){
-			return sharpDist;
+	sharpenedOctave: function(times){
+		var octave = this.get("octave");
+		var noteIndex = this.get("noteIndex");
+		if(times >= 0){ // Actually sharpening
+			if((times + noteIndex) >= 12){
+				return octave + Math.floor(times/12);
+			}
 		}
-		return -flatDist;
+		else{ // times is negative, so we're actually flattening
+			if(-times > noteIndex){ // flattening into a lower octave
+				return octave - Math.ceil(-times/12);
+			}
+		}
+		return octave;
+	},
+
+	flattenedOctave: function(times){
+		return this.sharpenedOctave(-times);
+	},
+
+	// sharpen() and flatten() modify the existing note.
+	sharpen: function(times){
+		var newNoteName = this.sharpenedNoteName(times);
+		var newOctave = this.sharpenedOctave(times);
+
+		// Set everything after doing the calculations, because octave calcs are dependent on the current note.
+		this.set("name", newNoteName);
+		this.set("octave", newOctave);
+
+		return this;
+	},
+
+	flatten: function(times){
+		return this.sharpen(-times);
+	},
+
+	sharpenedNote: function(times){
+		var newNote = DMusic.Note.create(this);
+		newNote.sharpen(times);
+		return newNote;
+	},
+
+	flattenedNote: function(times){
+		var newNote = DMusic.Note.create(this);
+		newNote.flatten(times);
+		return newNote;
 	}
 });
 
@@ -135,7 +151,7 @@ DMusic.NoteSet = Ember.Object.extend({
 			noteBuff.push(root.sharpenedNoteName(offsets[i]));
 		}
 		return noteBuff;
-	}.property("root", "offsets").cacheable(),
+	}.property("root", "offsets"),
 
 	noteIndex: function(note){
 		var notes = this.get("noteNames");
@@ -188,7 +204,6 @@ DMusic.DiatonicScale = DMusic.Scale.extend({
 				// Add every other note
 				var interval = (i + j*2) % len;
 				var noteName = root.sharpenedNoteName(interval);
-				console.log("noteName");
 			}
 		}
 	}
