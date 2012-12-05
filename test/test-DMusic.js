@@ -66,6 +66,7 @@ describe('DMusic.Note', function(){
 		it("should return the octave of a note that's been sharpened by the specified number of semitones", function(){
 			expect(A.sharpenedOctave(11)).to.be.equal(A.get("octave"));
 			expect(A.sharpenedOctave(12)).to.be.equal(A.get("octave") + 1);
+			expect(G.sharpenedOctave(2)).to.be.equal(G.get("octave") + 1);
 		});
 	});
 

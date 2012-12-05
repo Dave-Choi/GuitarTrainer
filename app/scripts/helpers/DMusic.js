@@ -92,7 +92,7 @@ DMusic.Note = Ember.Object.extend({
 		var noteIndex = this.get("noteIndex");
 		if(times >= 0){ // Actually sharpening
 			if((times + noteIndex) >= 12){
-				return octave + Math.floor(times/12);
+				return octave + Math.floor((times + noteIndex)/12) ;
 			}
 		}
 		else{ // times is negative, so we're actually flattening
