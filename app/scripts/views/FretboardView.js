@@ -14,24 +14,66 @@ function randomColor(){
 	World class handles scene creation, and basic camera interface.
 */
 GuitarTrainer.World = Ember.Object.extend({
-	world: null,
+	scene: null,
+	renderer: null,
 	camera: null,
 	camLight: null,
 
 	init: function(){
 		this._super();
-		var world = tQuery.createWorld().boilerplate();
-		world.tRenderer().setClearColorHex( 0x000000, world.tRenderer().getClearAlpha());
-		//tQuery.createAmbientLight().color(0xffffff).addTo(world);
-		var camera = world._camera;
-		var light = tQuery.createPointLight().position(0, 0, 0).color(0xffffff);
-		light.addTo(world);
+		//var world = tQuery.createWorld().boilerplate();
+		//world.tRenderer().setClearColorHex( 0x000000, world.tRenderer().getClearAlpha());
+		var $container = $("#exercise");
+		var height = $container.height(), width = $container.width();
+		console.log(width + " " + height);
 
-		this.set("world", world);
+		var renderer = new THREE.WebGLRenderer();
+		renderer.setSize(width, height);
 
+		var scene = new THREE.Scene();
+
+		var camera = new THREE.PerspectiveCamera(45, width/height, 0.1, 10000);
+		camera.position.z = 300;
+		var light = new THREE.PointLight(0xffffff);
+		light.position.x = 10;
+		light.position.y = 50;
+		light.position.z = 130;
+
+		scene.add(camera);
+		scene.add(light);
+
+		this.set("scene", scene);
 		this.set("camera", camera);
-		this.set("tQCamera", tQuery(camera));
 		this.set("camLight", light);
+
+		$container.append(renderer.domElement);
+		//renderer.setClearColorHex(0x000000, renderer.getClearAlpha());
+
+		// set up the sphere vars
+		var radius = 50,
+		    segments = 16,
+		    rings = 16;
+
+		var sphereMaterial =
+		  new THREE.MeshLambertMaterial(
+		    {
+		      color: 0xCC0000
+		    });
+
+
+		var sphere = new THREE.Mesh(
+
+		  new THREE.SphereGeometry(
+		    radius,
+		    segments,
+		    rings),
+
+		  sphereMaterial);
+
+		// add the sphere to the scene
+		scene.add(sphere);
+
+		renderer.render(scene, camera);
 	},
 
 	tweenPosBy: function(obj, vector, time){
@@ -96,15 +138,12 @@ GuitarTrainer.World = Ember.Object.extend({
 	},
 
 	start: function(){
-		var world = this.get("world");
-		world.start();
-		world.removeCameraControls();
-		this.get("tQCamera").rotate(-0.2, 0.25, 0);
-		world.loop().hook(function(){
-			TWEEN.update();
-		});
+		//this.get("tQCamera").rotate(-0.2, 0.25, 0);
+		// world.loop().hook(function(){
+		// TWEEN.update();
+		// });
 
-		this.panTo({x: 12, y: 7, Z: 1}, 200);
+		//this.panTo({x: 12, y: 7, Z: 1}, 200);
 	},
 
 	stop: function(){
@@ -280,9 +319,9 @@ GuitarTrainer.FretboardView = Ember.Object.extend({
 
 var world = GuitarTrainer.World.create();
 world.start();
-var fretboard = GuitarTrainer.FretboardView.create({world: world, instrument: GuitarTrainer.Guitar});
+//var fretboard = GuitarTrainer.FretboardView.create({world: world, instrument: GuitarTrainer.Guitar});
 
-fretboard.drawInstrument();
+//fretboard.drawInstrument();
 
 $(document).keydown(function(e){
 	if(e.keyCode == 65){ // A
