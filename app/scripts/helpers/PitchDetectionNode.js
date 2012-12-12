@@ -83,9 +83,15 @@ GuitarTrainer.PitchDetectionNode = Ember.Object.extend({
 			currently in the FFT spectrum.
 		*/
 		var spectrum = this.fft.spectrum;
-		var binIndex = Math.floor(frequency * this.binCount / this.sampleRate);
+		var binIndex = this.binForFreq(frequency);
 		console.log(binIndex + " - " + spectrum[binIndex]);
 		return spectrum[binIndex] >= threshold;
+	},
+
+	frequencyAmplitude: function(frequency){
+		var spectrum = this.get("fft").spectrum;
+		var binIndex = this.binForFreq(frequency);
+		return spectrum[binIndex];
 	}
 });
 

@@ -10,6 +10,87 @@ function randomColor(){
 }
 
 
+GuitarTrainer.ShapeFactory = Ember.Object.create({
+	// TODO: Refactor this into sexy abstract stuff.  Too tired to think right now.
+	sphere: function(args){
+		args = args || {};
+		var defaults = {
+			color: 0xffffff,
+			radius: 0.5,
+			segments: 15,
+			rings: 15
+		};
+		function getArg(name){
+			return args[name] || defaults[name];
+		}
+		var material = new THREE.MeshPhongMaterial({
+			color: getArg("color")
+		});
+		var geometry = new THREE.SphereGeometry(
+			getArg("radius"),
+			getArg("segments"),
+			getArg("rings")
+		);
+		return new THREE.Mesh(geometry, material);
+	},
+
+	cylinder: function(args){
+		args = args || {};
+		var defaults = {
+			color: 0xffffff,
+			radiusTop: 0.5,
+			radiusBottom: 0.5,
+			height: 1,
+			radiusSegments: 15,
+			heightSegments: 15,
+			openEnded: false
+		};
+		function getArg(name){
+			return args[name] || defaults[name];
+		}
+		var material = new THREE.MeshPhongMaterial({
+			color: getArg("color")
+		});
+		var geometry = new THREE.CylinderGeometry(
+			getArg("radiusTop"),
+			getArg("radiusBottom"),
+			getArg("height"),
+			getArg("radiusSegments"),
+			getArg("heightSegments"),
+			getArg("openEnded")
+		);
+		return new THREE.Mesh(geometry, material);
+	},
+
+	cube: function(args){
+		args = args || {};
+		var defaults = {
+			color: 0xffffff,
+			width: 1,
+			height: 1,
+			depth: 1,
+			widthSegments: 1,
+			heightSegments: 1,
+			depthSegments: 1
+		};
+		function getArg(name){
+			return args[name] || defaults[name];
+		}
+		var material = new THREE.MeshPhongMaterial({
+			color: getArg("color")
+		});
+		var geometry = new THREE.CubeGeometry(
+			getArg("width"),
+			getArg("height"),
+			getArg("depth"),
+			getArg("widthSegments"),
+			getArg("heightSegments"),
+			getArg("depthSegments")
+		);
+		return new THREE.Mesh(geometry, material);
+	}
+});
+
 /*
 	World class handles scene creation, and basic camera interface.
 */
@@ -33,7 +114,8 @@ GuitarTrainer.World = Ember.Object.extend({
 		var scene = new THREE.Scene();
 
 		var camera = new THREE.PerspectiveCamera(45, width/height, 0.1, 10000);
-		camera.position.z = 300;
+		camera.position = {x: 12, y: 7, z: 0};
+		camera.rotation = {x: -0.2, y: 0.25, z: 0};
 		var light = new THREE.PointLight(0xffffff);
 		light.position.x = 10;
 		light.position.y = 50;
@@ -42,36 +124,13 @@ GuitarTrainer.World = Ember.Object.extend({
 		scene.add(camera);
 		scene.add(light);
 
+		this.set("renderer", renderer);
 		this.set("scene", scene);
 		this.set("camera", camera);
 		this.set("camLight", light);
 
 		$container.append(renderer.domElement);
 		//renderer.setClearColorHex(0x000000, renderer.getClearAlpha());
-
-		// set up the sphere vars
-		var radius = 50,
-		    segments = 16,
-		    rings = 16;
-
-		var sphereMaterial =
-		  new THREE.MeshLambertMaterial(
-		    {
-		      color: 0xCC0000
-		    });
-
-
-		var sphere = new THREE.Mesh(
-
-		  new THREE.SphereGeometry(
-		    radius,
-		    segments,
-		    rings),
-
-		  sphereMaterial);
-
-		// add the sphere to the scene
-		scene.add(sphere);
 
 		renderer.render(scene, camera);
 	},
@@ -86,8 +145,13 @@ GuitarTrainer.World = Ember.Object.extend({
 		new TWEEN.Tween(obj.position).to(target, time).easing(TWEEN.Easing.Quadratic.InOut).start();
 	},
 
-	add: function(tq){
-		tq.addTo(this.get("world"));
+	render: function(){
+		TWEEN.update();
+		this.get("renderer").render(this.scene, this.camera);
+	},
+
+	add: function(obj){
+		this.get("scene").add(obj);
 	},
 
 	tweenPosTo: function(obj, target, time){
@@ -135,19 +199,6 @@ GuitarTrainer.World = Ember.Object.extend({
 
 	turnRight: function(){
 		this.get("camera").rotate(0, -0.05, 0);
-	},
-
-	start: function(){
-		//this.get("tQCamera").rotate(-0.2, 0.25, 0);
-		// world.loop().hook(function(){
-		// TWEEN.update();
-		// });
-
-		//this.panTo({x: 12, y: 7, Z: 1}, 200);
-	},
-
-	stop: function(){
-		this.get("world").stop();
 	}
 });
 
@@ -186,9 +237,7 @@ GuitarTrainer.StringView = Ember.Object.extend({
 		var segments = this.get("segments");
 		var numSegments = string.get("numFrets");
 		var fretPositions = this.get("fretPositions");
-		var phongMaterial = this.get("phongMaterial");
-		var lambertMaterial = this.get("lambertMaterial");
-		var diameter = this.get("diameter");
+		var radius = this.get("diameter")/2;
 		var halfPi = Math.PI/2;
 		// fretOffset is the number of skipped frets for any irregular instruments (such as a banjo)
 		var fretOffset = fretPositions.length - numSegments - 1; // Subtract one, because there is a 0 fret at the nut.
@@ -198,10 +247,35 @@ GuitarTrainer.StringView = Ember.Object.extend({
 			var fretPos1 = fretPositions[fretIndex], fretPos2 = fretPositions[fretIndex + 1];
 			var fretLength = fretPos2 - fretPos1;
 			var fretCenter = (fretPos1 + fretPos2) / 2;
-			var segment = tQuery.createCylinder((i%2)?phongMaterial:lambertMaterial).addClass("string").rotate(0, 0, halfPi).scale(diameter, fretLength, diameter).translate(fretCenter, yPos, zPos);
-			//segment.get(0).material.color.setRGB(1, 1, 1);
+			var segment = GuitarTrainer.ShapeFactory.cylinder({radiusTop: radius, radiusBottom: radius, height: fretLength, color: this.get("color")});
+			segment.position = {x: fretCenter, y: yPos, z: zPos};
+			segment.rotation = {x: 0, y: 0, z: halfPi};
 			segments.push(segment);
 			world.add(segment);
+		}
+	}
+});
+
+GuitarTrainer.HeatmapStringView = GuitarTrainer.StringView.extend({
+	pitchDetectionNode: null,
+
+	ampToOpacity: function(amp){
+		return Math.max(0.1, amp * 100);
+	},
+
+	update: function(){
+		var string = this.get("string");
+		var pdNode = this.get("pitchDetectionNode");
+		var notes = string.get("notes");
+		var segments = this.get("segments");
+		var len = segments.length;
+		for(var i=0; i<len; i++){
+			var note = notes[i];
+			var freq = note.get("frequency");
+			var amp = pdNode.frequencyAmplitude(freq);
+			var segment = segments[i];
+			//segment.material.color.setRGB(1, 1, 1);
+			segment.material.opacity = this.ampToOpacity(amp);
 		}
 	}
 });
@@ -209,12 +283,18 @@ GuitarTrainer.StringView = Ember.Object.extend({
 GuitarTrainer.FretboardView = Ember.Object.extend({
 	world: null,
 	instrument: null,
+	stringViews: null,
 	/*
 		stringLength is the distance between the bridge and the nut for the longest string,
 		which extends beyond the fretboard.
 		Frets are assumed to be aligned for irregular strings (such as on a banjo)
 	*/
 	stringLength: 50,
+
+	init: function(){
+		this._super();
+		this.set("stringViews", []);
+	},
 
 	fretPositions: function(){
 		var k = Math.pow(2, 1/12);
@@ -252,10 +332,9 @@ GuitarTrainer.FretboardView = Ember.Object.extend({
 		var halfPi = Math.PI/2;
 		var colors = [0xff00ff, 0x00ff00, 0xff8800, 0x0000ff, 0xffff00, 0xff0000];
 		var fretPositions = this.get("fretPositions");
+		var stringViews = [];
 
 		for(var i=0; i<6; i++){
-			//var newString = tQuery.createCylinder(new THREE.MeshBasicMaterial({color: colors[i], opacity: 1})).addClass("string").rotate(0, 0, halfPi).scale(0.1, 50, 0.1).translate(25, i*0.55, -18);
-			//world.add(newString);
 			var string = this.get("instrument").get("strings")[i];
 			var newString = GuitarTrainer.StringView.create({
 				world: world,
@@ -265,7 +344,10 @@ GuitarTrainer.FretboardView = Ember.Object.extend({
 				yPos: i * 0.55,
 				zPos: -18
 			});
+			stringViews.push(newString);
 		}
+
+		this.set("stringViews", stringViews);
 	},
 
 	makeFrets: function(){
@@ -277,10 +359,13 @@ GuitarTrainer.FretboardView = Ember.Object.extend({
 		for(var i=0; i<len; i++){
 			var x = fretPositions[i];
 
-			var fret = tQuery.createCube(new THREE.MeshLambertMaterial({color: 0x888888, opacity: 1})).addClass("fret").scale(0.1, 3.5, 0.1).translate(x, 1.4, -17.8);
+			var fret = GuitarTrainer.ShapeFactory.cube({width: 0.1, height: 3.5, depth: 0.1, color: 0x888888});
+			fret.position = {x: x, y: 1.4, z: -17.8};
 			world.add(fret);
 
-			var track = tQuery.createCube(new THREE.MeshPhongMaterial({color: 0xaaaaff})).addClass("track").scale(0.05, 0.05, 100).translate(x, 0, -67.8);
+			var track = GuitarTrainer.ShapeFactory.cube({width: 0.05, height: 0.05, depth: 100, color: 0xaaaaff});
+			track.position = {x: x, y: 0, z: -67.8};
+			
 			world.add(track);
 		}
 	},
@@ -292,7 +377,8 @@ GuitarTrainer.FretboardView = Ember.Object.extend({
 
 		for(var i=0; i<len; i++){
 			var x = dotPositions[i];
-			var dot = tQuery.createSphere(new THREE.MeshBasicMaterial({color: 0xff0000, opacity: 1})).addClass("dot").scale(0.2, 0.2, 0.2).translate(x, 1.4, -17.8);
+			var dot = GuitarTrainer.ShapeFactory.sphere({color: 0xff0000, radius: 0.1});
+			dot.position = {x: x, y: 1.4, z: -17.8};
 			world.add(dot);
 		}
 	},
@@ -301,6 +387,7 @@ GuitarTrainer.FretboardView = Ember.Object.extend({
 		this.makeStrings();
 		this.makeFrets();
 		this.makeDots();
+		this.get("world").render();
 	},
 
 	panToFret: function(fret){
@@ -316,12 +403,55 @@ GuitarTrainer.FretboardView = Ember.Object.extend({
 	}
 });
 
+GuitarTrainer.HeatmapFretboardView = GuitarTrainer.FretboardView.extend({
+	pitchDetectionNode: null,
+
+	makeStrings: function(){
+		var world = this.get("world");
+		var halfPi = Math.PI/2;
+		var colors = [0xff00ff, 0x00ff00, 0xff8800, 0x0000ff, 0xffff00, 0xff0000];
+		var fretPositions = this.get("fretPositions");
+		var stringViews = [];
+		var pdNode = this.get("pitchDetectionNode");
+
+		for(var i=0; i<6; i++){
+			var string = this.get("instrument").get("strings")[i];
+			var newString = GuitarTrainer.HeatmapStringView.create({
+				world: world,
+				string: string,
+				fretPositions: fretPositions,
+				color: colors[i],
+				yPos: i * 0.55,
+				zPos: -18,
+				pitchDetectionNode: pdNode
+			});
+			stringViews.push(newString);
+		}
+
+		this.set("stringViews", stringViews);
+	},
+
+	update: function(){
+		var strings = this.get("stringViews");
+		var len = strings.length;
+		for(var i=0; i<len; i++){
+			strings[i].update();
+		}
+	}
+});
+
 
 var world = GuitarTrainer.World.create();
-world.start();
-//var fretboard = GuitarTrainer.FretboardView.create({world: world, instrument: GuitarTrainer.Guitar});
+// pitchDetectionNode is initialized in PitchDetectionNode.js right now.  This is total shit and needs to be reorganized.
+var fretboard = GuitarTrainer.HeatmapFretboardView.create({world: world, instrument: GuitarTrainer.Guitar, pitchDetectionNode: pitchDetectionNode});
+fretboard.drawInstrument();
 
-//fretboard.drawInstrument();
+function render(){
+	requestAnimationFrame(render);
+	fretboard.update();
+	world.render();
+}
+requestAnimationFrame(render);
 
 $(document).keydown(function(e){
 	if(e.keyCode == 65){ // A
