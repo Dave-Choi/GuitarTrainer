@@ -15,9 +15,9 @@ describe('DMusic.Note', function(){
 	describe('.frequency', function(){
 		it("should derive from name and octave", function(){
 			var note = DMusic.Note.create({name: "A", octave: 4});
-			expect(note.get("frequency")).to.be.equal(220);
-			note.set("octave", 5);
 			expect(note.get("frequency")).to.be.equal(440);
+			note.set("octave", 5);
+			expect(note.get("frequency")).to.be.equal(880);
 		});
 
 		it("should calculate for octaves higher than 10", function(){
@@ -160,12 +160,6 @@ describe('DMusic.Note', function(){
 		it("should leave the original note unaltered", function(){
 			expect(B.get("name")).to.be.equal("B");
 			expect(B.get("octave")).to.be.equal(4);
-		});
-	});
-
-	describe(".sharpDifference()", function(){
-		it("should count the semitones between notes", function(){
-			
 		});
 	});
 

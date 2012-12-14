@@ -27,7 +27,7 @@ GuitarTrainer.String = Ember.Object.extend({
 		var buff = "";
 		for(var i=0; i<len; i++){
 			var note = notes[i];
-			buff += note.get("name") + note.get("octave") + " (" + note.get("frequency") + ")";
+			buff += note.get("name") + note.get("octave") + " (" + note.get("frequency") + ")\n";
 		}
 		console.log(buff);
 	}
