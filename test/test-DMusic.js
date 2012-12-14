@@ -64,15 +64,16 @@ describe('DMusic.Note', function(){
 
 	describe(".sharpenedOctave(times)", function(){
 		it("should return the octave of a note that's been sharpened by the specified number of semitones", function(){
-			expect(A.sharpenedOctave(11)).to.be.equal(A.get("octave"));
+			expect(C.sharpenedOctave(11)).to.be.equal(C.get("octave"));
 			expect(A.sharpenedOctave(12)).to.be.equal(A.get("octave") + 1);
-			expect(G.sharpenedOctave(2)).to.be.equal(G.get("octave") + 1);
+			expect(B.sharpenedOctave(1)).to.be.equal(B.get("octave") + 1);
 		});
 	});
 
 	describe(".flattenedOctave(times)", function(){
 		it("should return the octave of a note that's been flattened by the specified number of semitones", function(){
-			expect(G.flattenedOctave(10)).to.be.equal(G.get("octave"));
+			expect(B.flattenedOctave(10)).to.be.equal(B.get("octave"));
+			expect(C.flattenedOctave(1)).to.be.equal(C.get("octave") - 1);
 			expect(G.flattenedOctave(11)).to.be.equal(G.get("octave") - 1);
 		});
 	});
