@@ -281,29 +281,25 @@ GuitarTrainer.StringView = Ember.Object.extend({
 });
 
 GuitarTrainer.HeatmapStringView = GuitarTrainer.StringView.extend({
-	pitchDetectionNode: null,
-
 	ampToOpacity: function(amp){
 		return Math.max(0.1, amp * 100);
 	},
 
-	update: function(){
+	update: function(pitchDetectionNode){
 		/*
 			The string notes include the string's open note, i.e. fret 0, i.e. the nut
 			Check the 0 fret first, and use it as a baseline for the whole string.
 		*/
 		var string = this.get("string");
-		var pdNode = this.get("pitchDetectionNode");
 		var notes = string.get("notes");
 		var segments = this.get("segments");
 		var len = segments.length;
-		console.log(len + " " + notes.length);
 		var rootFreq = string.get("root").get("frequency");
-		var rootAmp = pdNode.frequencyAmplitude(rootFreq);
+		var rootAmp = pitchDetectionNode.frequencyAmplitude(rootFreq);
 		for(var i=1; i<len; i++){
 			var note = notes[i];
 			var freq = note.get("frequency");
-			var amp = rootAmp + pdNode.frequencyAmplitude(freq);
+			var amp = rootAmp + pitchDetectionNode.frequencyAmplitude(freq);
 			var segment = segments[i-1];
 			segment.material.opacity = this.ampToOpacity(amp);
 		}
@@ -320,6 +316,13 @@ GuitarTrainer.FretboardView = Ember.Object.extend({
 		Frets are assumed to be aligned for irregular strings (such as on a banjo)
 	*/
 	stringLength: 50,
+
+	// These colors and orientation reflect the Rocksmith string coloring
+	stringColors: [0xff0000, 0xffff00, 0x0000ff, 0xff8800, 0x00ff00, 0xff00ff],
+	flipped: true,  // If flipped is true, the red (low E) string is shown on top, mirroring a right handed guitar
+
+	// Can be configured to use different string views,
+	stringType: GuitarTrainer.StringView,
 
 	init: function(){
 		this._super();
@@ -360,18 +363,24 @@ GuitarTrainer.FretboardView = Ember.Object.extend({
 	makeStrings: function(){
 		var world = this.get("world");
 		var halfPi = Math.PI/2;
-		var colors = [0xff00ff, 0x00ff00, 0xff8800, 0x0000ff, 0xffff00, 0xff0000];
+		var flipped = this.get("flipped");
+		var colors = this.get("stringColors");
+
 		var fretPositions = this.get("fretPositions");
 		var stringViews = [];
 
+		var stringType = this.get("stringType");
+
 		for(var i=0; i<6; i++){
 			var string = this.get("instrument").get("strings")[i];
-			var newString = GuitarTrainer.StringView.create({
+			var newString = stringType.create({
 				world: world,
 				string: string,
 				fretPositions: fretPositions,
 				color: colors[i],
-				yPos: i * 0.55,
+				yPos: (flipped)?
+					(5-i) * 0.55
+					: i * 0.55,
 				zPos: -18
 			});
 			stringViews.push(newString);
@@ -435,37 +444,14 @@ GuitarTrainer.FretboardView = Ember.Object.extend({
 
 GuitarTrainer.HeatmapFretboardView = GuitarTrainer.FretboardView.extend({
 	pitchDetectionNode: null,
-
-	makeStrings: function(){
-		var world = this.get("world");
-		var halfPi = Math.PI/2;
-		var colors = [0xff00ff, 0x00ff00, 0xff8800, 0x0000ff, 0xffff00, 0xff0000];
-		var fretPositions = this.get("fretPositions");
-		var stringViews = [];
-		var pdNode = this.get("pitchDetectionNode");
-
-		for(var i=0; i<6; i++){
-			var string = this.get("instrument").get("strings")[i];
-			var newString = GuitarTrainer.HeatmapStringView.create({
-				world: world,
-				string: string,
-				fretPositions: fretPositions,
-				color: colors[i],
-				yPos: i * 0.55,
-				zPos: -18,
-				pitchDetectionNode: pdNode
-			});
-			stringViews.push(newString);
-		}
-
-		this.set("stringViews", stringViews);
-	},
+	stringType: GuitarTrainer.HeatmapStringView,
 
 	update: function(){
 		var strings = this.get("stringViews");
+		var pdNode = this.get("pitchDetectionNode");
 		var len = strings.length;
 		for(var i=0; i<len; i++){
-			strings[i].update();
+			strings[i].update(pdNode);
 		}
 	}
 });
