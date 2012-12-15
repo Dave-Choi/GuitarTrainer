@@ -103,8 +103,6 @@ GuitarTrainer.World = Ember.Object.extend({
 
 	init: function(){
 		this._super();
-		//var world = tQuery.createWorld().boilerplate();
-		//world.tRenderer().setClearColorHex( 0x000000, world.tRenderer().getClearAlpha());
 		var $container = $("#exercise");
 		var height = $container.height(), width = $container.width();
 		var scene = new THREE.Scene();
@@ -169,7 +167,6 @@ GuitarTrainer.World = Ember.Object.extend({
 		var scene = this.get("scene");
 		var camera = this.get("camera");
 		TWEEN.update();
-		//renderer.render(scene, camera);
 		renderer.clear();
 		composer.render();
 	},
@@ -426,7 +423,6 @@ GuitarTrainer.FretboardView = Ember.Object.extend({
 		this.makeStrings();
 		this.makeFrets();
 		this.makeDots();
-		this.get("world").render();
 	},
 
 	panToFret: function(fret){
