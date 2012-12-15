@@ -288,17 +288,23 @@ GuitarTrainer.HeatmapStringView = GuitarTrainer.StringView.extend({
 	},
 
 	update: function(){
+		/*
+			The string notes include the string's open note, i.e. fret 0, i.e. the nut
+			Check the 0 fret first, and use it as a baseline for the whole string.
+		*/
 		var string = this.get("string");
 		var pdNode = this.get("pitchDetectionNode");
 		var notes = string.get("notes");
 		var segments = this.get("segments");
 		var len = segments.length;
-		for(var i=0; i<len; i++){
+		console.log(len + " " + notes.length);
+		var rootFreq = string.get("root").get("frequency");
+		var rootAmp = pdNode.frequencyAmplitude(rootFreq);
+		for(var i=1; i<len; i++){
 			var note = notes[i];
 			var freq = note.get("frequency");
-			var amp = pdNode.frequencyAmplitude(freq);
-			var segment = segments[i];
-			//segment.material.color.setRGB(1, 1, 1);
+			var amp = rootAmp + pdNode.frequencyAmplitude(freq);
+			var segment = segments[i-1];
 			segment.material.opacity = this.ampToOpacity(amp);
 		}
 	}
