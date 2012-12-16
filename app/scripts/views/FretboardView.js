@@ -400,10 +400,11 @@ GuitarTrainer.FretboardView = Ember.Object.extend({
 				string: string,
 				fretPositions: fretPositions,
 				color: colors[i],
+				diameter: 0.1,
 				yPos: (flipped)?
 					(numStrings-i-1) * stringSpacing
 					: i * stringSpacing,
-				zPos: -0.5
+				zPos: -0.2
 			});
 			stringViews.push(newString);
 		}
@@ -434,7 +435,7 @@ GuitarTrainer.FretboardView = Ember.Object.extend({
 		for(var i=0; i<len; i++){
 			var x = dotPositions[i];
 			var dot = GuitarTrainer.ShapeFactory.sphere({color: 0xff0000, radius: 0.1});
-			dot.position = {x: x, y: 1.4, z: -0.5};
+			dot.position = {x: x, y: 1.4, z: -0.1};
 			world.add(dot);
 		}
 	},
