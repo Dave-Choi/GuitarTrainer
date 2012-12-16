@@ -115,13 +115,13 @@ GuitarTrainer.World = Ember.Object.extend({
 		renderer.setSize(width, height);
 		renderer.autoClear = false;
 
+		var initialPosition = {x: 12, y: 7, z: 18};
+
 		var camera = new THREE.PerspectiveCamera(45, width/height, 0.1, 10000);
-		camera.position = {x: 12, y: 7, z: 0};
+		camera.position = initialPosition;
 		camera.rotation = {x: -0.2, y: 0.25, z: 0};
 		var light = new THREE.PointLight(0xffffff);
-		light.position.x = 10;
-		light.position.y = 50;
-		light.position.z = 130;
+		light.position = initialPosition;
 
 		scene.add(camera);
 		scene.add(light);
@@ -303,6 +303,27 @@ GuitarTrainer.HeatmapStringView = GuitarTrainer.StringView.extend({
 	}
 });
 
+GuitarTrainer.TrackView = Ember.Object.extend({
+	world: null,
+	instrument: null,
+	fretPositions: null,
+	stringSpacing: 0.55,
+	length: 100,
+
+	init: function(){
+		var world = this.get("world");
+		var fretPositions = this.get("fretPositions");
+		var trackLength = this.get("length");
+		var len = fretPositions.length;
+		for(var i=0; i<len; i++){
+			var x = fretPositions[i];
+			var track = GuitarTrainer.ShapeFactory.cube({width: 0.05, height: 0.05, depth: trackLength, color: 0xaaaaff});
+			track.position = {x: x, y: 0, z: -trackLength/2};
+			world.add(track);
+		}
+	}
+});
+
 GuitarTrainer.FretboardView = Ember.Object.extend({
 	world: null,
 	instrument: null,
@@ -313,6 +334,7 @@ GuitarTrainer.FretboardView = Ember.Object.extend({
 		Frets are assumed to be aligned for irregular strings (such as on a banjo)
 	*/
 	stringLength: 50,
+	stringSpacing: 0.55, // Vertical space between strings
 
 	// These colors and orientation reflect the Rocksmith string coloring
 	stringColors: [0xff0000, 0xffff00, 0x0000ff, 0xff8800, 0x00ff00, 0xff00ff],
@@ -365,20 +387,23 @@ GuitarTrainer.FretboardView = Ember.Object.extend({
 
 		var fretPositions = this.get("fretPositions");
 		var stringViews = [];
-
+		var stringSpacing = this.get("stringSpacing");
 		var stringType = this.get("stringType");
 
-		for(var i=0; i<6; i++){
-			var string = this.get("instrument").get("strings")[i];
+		var strings = this.get("instrument").get("strings");
+		var numStrings = strings.length;
+
+		for(var i=0; i<numStrings; i++){
+			var string = strings[i];
 			var newString = stringType.create({
 				world: world,
 				string: string,
 				fretPositions: fretPositions,
 				color: colors[i],
 				yPos: (flipped)?
-					(5-i) * 0.55
-					: i * 0.55,
-				zPos: -18
+					(numStrings-i-1) * stringSpacing
+					: i * stringSpacing,
+				zPos: -0.5
 			});
 			stringViews.push(newString);
 		}
@@ -396,13 +421,8 @@ GuitarTrainer.FretboardView = Ember.Object.extend({
 			var x = fretPositions[i];
 
 			var fret = GuitarTrainer.ShapeFactory.cube({width: 0.1, height: 3.5, depth: 0.1, color: 0x888888});
-			fret.position = {x: x, y: 1.4, z: -17.8};
+			fret.position = {x: x, y: 1.4, z: 0};
 			world.add(fret);
-
-			var track = GuitarTrainer.ShapeFactory.cube({width: 0.05, height: 0.05, depth: 100, color: 0xaaaaff});
-			track.position = {x: x, y: 0, z: -67.8};
-			
-			world.add(track);
 		}
 	},
 
@@ -414,7 +434,7 @@ GuitarTrainer.FretboardView = Ember.Object.extend({
 		for(var i=0; i<len; i++){
 			var x = dotPositions[i];
 			var dot = GuitarTrainer.ShapeFactory.sphere({color: 0xff0000, radius: 0.1});
-			dot.position = {x: x, y: 1.4, z: -17.8};
+			dot.position = {x: x, y: 1.4, z: -0.5};
 			world.add(dot);
 		}
 	},
@@ -457,6 +477,9 @@ var world = GuitarTrainer.World.create();
 // pitchDetectionNode is initialized in PitchDetectionNode.js right now.  This is total shit and needs to be reorganized.
 var fretboard = GuitarTrainer.HeatmapFretboardView.create({world: world, instrument: GuitarTrainer.Guitar, pitchDetectionNode: pitchDetectionNode});
 fretboard.drawInstrument();
+var fretPositions = fretboard.get("fretPositions");
+var stringSpacing = fretboard.get("stringSpacing");
+var track = GuitarTrainer.TrackView.create({world: world, instrument: GuitarTrainer.Guitar, fretPositions: fretPositions, stringSpacing: stringSpacing});
 
 function render(){
 	requestAnimationFrame(render);
