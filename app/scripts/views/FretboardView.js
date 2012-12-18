@@ -268,6 +268,7 @@ GuitarTrainer.StringView = Ember.Object.extend({
 			var fretPos1 = fretPositions[fretIndex], fretPos2 = fretPositions[fretIndex + 1];
 			var fretLength = fretPos2 - fretPos1;
 			var fretCenter = (fretPos1 + fretPos2) / 2;
+
 			var segment = GuitarTrainer.ShapeFactory.cylinder({radiusTop: radius, radiusBottom: radius, height: fretLength, color: this.get("color")});
 			segment.position = {x: fretCenter, y: yPos, z: zPos};
 			segment.rotation = {x: 0, y: 0, z: halfPi};
@@ -303,24 +304,97 @@ GuitarTrainer.HeatmapStringView = GuitarTrainer.StringView.extend({
 	}
 });
 
+
+/*
+	Target is an abstract interface to represent targets the player may hit.
+
+	Chords should be composed of multiple targets, as this is more useful in terms of feedback
+	for the user, because they can see what notes they've missed.
+*/
+GuitarTrainer.Target = Ember.Object.extend({
+	displayTime: 0,	// The time when the target will cross the fretboard
+	startTime: 0,	// The time to begin listening for a hit
+	duration: 1,	// The length of time the player has after startTime to hit the target
+
+	listen: function(){
+		/*
+			Called on update, to evaluate if the target's been hit.  Can update whatever internal
+			state it needs to to accomplish this (e.g. maintain a series of frequency flags for a
+			bend or slide)
+		*/
+	}
+});
+
+GuitarTrainer.FrequencyTarget = GuitarTrainer.Target.extend({
+	frequency: 0,
+	threshold: 1,	/*
+					I don't actually know what units these are in, but this is the minimum
+					value in the FFT bucket that will register as a hit.
+					*/
+	listen: function(pitchDetectionNode){
+		this._super();
+		var frequency = this.get("frequency");
+		var amp = pitchDetectionNode.frequencyAmplitude(frequency);
+		return (amp >= threshold);
+	}
+});
+
+GuitarTrainer.FrequencyTargetView = Ember.Object.extend({
+	world: null,
+	target: null,
+	sceneNode: null,
+	position: null,
+	dimensions: null, // These are container dimensions.  The view doesn't have to be this big.
+
+	draw: function(){
+		var world = this.get("world");
+		var position = this.get("position");
+		var dimensions = this.get("dimensions");
+		var node = GuitarTrainer.ShapeFactory.cube({width: dimensions.x * 0.8, height: dimensions.y * 0.8, depth: dimensions.z * 0.8});
+		node.position = position;
+		this.set("sceneNode", node);
+		world.add(node);
+	}
+});
+
 GuitarTrainer.TrackView = Ember.Object.extend({
 	world: null,
-	instrument: null,
-	fretPositions: null,
-	stringSpacing: 0.55,
+	targets: null,
+	fretboardView: null,
 	length: 100,
+	delay: 5000, // Time (ms) it will take from the moment the note appears until it's time to hit it.
+	time: 0, // Used to evaluate when to create targets
 
 	init: function(){
 		var world = this.get("world");
-		var fretPositions = this.get("fretPositions");
+		var fretPositions = this.get("fretboardView").get("fretPositions");
 		var trackLength = this.get("length");
+		var trackOffset = -trackLength/2;
 		var len = fretPositions.length;
 		for(var i=0; i<len; i++){
 			var x = fretPositions[i];
 			var track = GuitarTrainer.ShapeFactory.cube({width: 0.05, height: 0.05, depth: trackLength, color: 0xaaaaff});
-			track.position = {x: x, y: 0, z: -trackLength/2};
+			track.position = {x: x, y: 0, z: trackOffset};
 			world.add(track);
 		}
+	},
+
+	spawnTarget: function(target, viewType, stringIndex, fretIndex){
+		var fretboardView = this.get("fretboardView");
+		var stringSpacing = fretboardView.get("stringSpacing");
+		var position = {x: fretboardView.fretCenter(fretIndex), y: stringSpacing * stringIndex, z: -this.get("length")};
+		var dimensions = {x: fretboardView.fretWidth(fretIndex), y: fretboardView.get("stringSpacing"), z: fretboardView.get("stringSpacing")};
+		console.log(position);
+		console.log(dimensions);
+		var targetView = viewType.create({
+			world: world,
+			target: target,
+			position: position,
+			dimensions: dimensions
+		});
+		targetView.draw();
+		var node = targetView.get("sceneNode");
+		new TWEEN.Tween(node.position).to({x: node.position.x, y: node.position.y, z: 0}, this.get("delay")).start();
 	}
 });
 
@@ -363,14 +437,31 @@ GuitarTrainer.FretboardView = Ember.Object.extend({
 		return positions;
 	}.property("stringLength", "numFrets"),
 
+	stringPositions: function(){
+		var stringSpacing = this.get("stringSpacing");
+		var flipped = this.get("flipped");
+		var positions = [];
+		var numStrings = this.get("instrument").get("strings").length;
+		for(var i=0; i<numStrings; i++){
+			if(flipped){
+				positions.push((numStrings - i - 1) * stringSpacing);
+			}
+			else{
+				positions.push(i * stringSpacing);
+			}
+		}
+		return positions;
+	}.property("stringSpacing", "flipped", "instrument.strings.length"),
+
 	dotPositions: function(){
 		var fretPositions = this.get("fretPositions");
+		var numFrets = fretPositions.length;
 		var dotFrets = [3, 5, 7, 9, 12, 15, 17, 19, 21, 24];
 		var i, len = dotFrets.length;
 		var positions = [];
 		for(i=0; i<len; i++){
 			var fretNum = dotFrets[i];
-			if(fretNum > this.numFrets){
+			if(fretNum > numFrets){
 				return positions;
 			}
 			var fretPos1 = fretPositions[fretNum-1], fretPos2 = fretPositions[fretNum];
@@ -379,6 +470,26 @@ GuitarTrainer.FretboardView = Ember.Object.extend({
 		return positions;
 	}.property("fretPositions"),
 
+	fretWidth: function(fretIndex){
+		var fretPositions = this.get("fretPositions");
+		var numFrets = fretPositions.length;
+		if(fretIndex < 0 || fretIndex > numFrets - 1){
+			return 0;
+		}
+		var leftFretPos = fretPositions[fretIndex], rightFretPos = fretPositions[fretIndex + 1];
+		return rightFretPos - leftFretPos;
+	},
+
+	fretCenter: function(fretIndex){
+		var fretPositions = this.get("fretPositions");
+		var numFrets = fretPositions.length;
+		if(fretIndex < 0 || fretIndex > numFrets - 1){
+			return 0;
+		}
+		var leftFretPos = fretPositions[fretIndex], rightFretPos = fretPositions[fretIndex + 1];
+		return (leftFretPos + rightFretPos) / 2;
+	},
+
 	makeStrings: function(){
 		var world = this.get("world");
 		var halfPi = Math.PI/2;
@@ -386,8 +497,8 @@ GuitarTrainer.FretboardView = Ember.Object.extend({
 		var colors = this.get("stringColors");
 
 		var fretPositions = this.get("fretPositions");
+		var stringPositions = this.get("stringPositions");
 		var stringViews = [];
-		var stringSpacing = this.get("stringSpacing");
 		var stringType = this.get("stringType");
 
 		var strings = this.get("instrument").get("strings");
@@ -401,9 +512,7 @@ GuitarTrainer.FretboardView = Ember.Object.extend({
 				fretPositions: fretPositions,
 				color: colors[i],
 				diameter: 0.1,
-				yPos: (flipped)?
-					(numStrings-i-1) * stringSpacing
-					: i * stringSpacing,
+				yPos: stringPositions[i],
 				zPos: -0.2
 			});
 			stringViews.push(newString);
@@ -476,15 +585,21 @@ GuitarTrainer.HeatmapFretboardView = GuitarTrainer.FretboardView.extend({
 
 var world = GuitarTrainer.World.create();
 // pitchDetectionNode is initialized in PitchDetectionNode.js right now.  This is total shit and needs to be reorganized.
-var fretboard = GuitarTrainer.HeatmapFretboardView.create({world: world, instrument: GuitarTrainer.Guitar, pitchDetectionNode: pitchDetectionNode});
+//var fretboard = GuitarTrainer.HeatmapFretboardView.create({world: world, instrument: GuitarTrainer.Guitar, pitchDetectionNode: pitchDetectionNode});
+var fretboard = GuitarTrainer.FretboardView.create({world: world, instrument: GuitarTrainer.Guitar, pitchDetectionNode: pitchDetectionNode});
 fretboard.drawInstrument();
 var fretPositions = fretboard.get("fretPositions");
 var stringSpacing = fretboard.get("stringSpacing");
-var track = GuitarTrainer.TrackView.create({world: world, instrument: GuitarTrainer.Guitar, fretPositions: fretPositions, stringSpacing: stringSpacing});
+var track = GuitarTrainer.TrackView.create({world: world, instrument: GuitarTrainer.Guitar, fretboardView: fretboard});
+
+var frequencyTarget = GuitarTrainer.FrequencyTarget.create({
+	frequency: 440
+});
+track.spawnTarget(frequencyTarget, GuitarTrainer.FrequencyTargetView, 5, 5);
 
 function render(){
 	requestAnimationFrame(render);
-	fretboard.update();
+	//fretboard.update();
 	world.render();
 }
 requestAnimationFrame(render);
