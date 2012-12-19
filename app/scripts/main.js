@@ -15,7 +15,10 @@ GuitarTrainer.ready = function(){
 	var frequencyTarget = GuitarTrainer.FrequencyTarget.create({
 		frequency: 440
 	});
-	track.spawnTarget(frequencyTarget, GuitarTrainer.FrequencyTargetView, 5, 5);
+
+	function spawnRandomTarget(){
+		track.spawnTarget(frequencyTarget, GuitarTrainer.FrequencyTargetView, Math.floor(Math.random()*5), Math.floor(Math.random()*22));
+	}
 
 	function render(){
 		requestAnimationFrame(render);
@@ -38,7 +41,7 @@ GuitarTrainer.ready = function(){
 			world.zoomIn();
 		}
 		if(e.keyCode == 81){ // Q
-			world.turnLeft();
+			spawnRandomTarget();
 		}
 		if(e.keyCode == 69){ // E
 			world.turnRight();
