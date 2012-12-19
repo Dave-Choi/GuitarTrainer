@@ -9,18 +9,33 @@ GuitarTrainer.TrackView = Ember.Object.extend({
 
 	init: function(){
 		var world = this.get("world");
-		var fretPositions = this.get("fretboardView").get("fretPositions");
+		var fretboardView = this.get("fretboardView");
 		var trackLength = this.get("length");
 		var trackOffset = -trackLength/2;
-		var len = fretPositions.length;
 		var mergedGeometry = new THREE.Geometry();
-		for(var i=0; i<len; i++){
-			var x = fretPositions[i];
-			var track = GuitarTrainer.ShapeFactory.cube({width: 0.05, height: 0.05, depth: trackLength, color: 0xaaaaff});
-			track.position = {x: x, y: 0, z: trackOffset};
+
+		var fretPositions = fretboardView.get("fretPositions");
+		var i, x, y = -0.2525, numFrets = fretPositions.length;
+		for(i=0; i<numFrets; i++){
+			x = fretPositions[i];
+			var track = GuitarTrainer.ShapeFactory.cube({width: 0.07, height: 0.05, depth: trackLength, color: 0xaaaaff});
+			track.position = {x: x, y: y, z: trackOffset};
 			THREE.GeometryUtils.merge(mergedGeometry, track);
 		}
-		var mesh = new THREE.Mesh(mergedGeometry, new THREE.MeshPhongMaterial({color:  0xaaaaff}));
+
+		var dotPositions = fretboardView.get("dotPositions");
+		var dotFrets = fretboardView.get("dotFrets");
+		var numDots = dotFrets.length;
+		for(i=0; i<numDots; i++){
+			var fretIndex = dotFrets[i]-1;
+			x = fretboardView.fretCenter(fretIndex);
+			var width = fretboardView.fretWidth(fretIndex);
+			var dotLane = GuitarTrainer.ShapeFactory.cube({width: width, height: 0.05, depth: trackLength, color: 0xaaaaff});
+			dotLane.position = {x: x, y: y, z: trackOffset};
+			THREE.GeometryUtils.merge(mergedGeometry, dotLane);
+		}
+
+		var mesh = new THREE.Mesh(mergedGeometry, new THREE.MeshLambertMaterial({color:  0xbbbbff}));
 		this.set("mesh", mesh);
 		world.add(mesh);
 	},

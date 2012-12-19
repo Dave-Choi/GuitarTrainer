@@ -9,6 +9,7 @@ GuitarTrainer.FretboardView = Ember.Object.extend({
 	*/
 	stringLength: 50,
 	stringSpacing: 0.55, // Vertical space between strings
+	dotFrets:  [3, 5, 7, 9, 12, 15, 17, 19, 21, 24],
 
 	// These colors and orientation reflect the Rocksmith string coloring
 	stringColors: [0xff0000, 0xffff00, 0x0000ff, 0xff8800, 0x00ff00, 0xff00ff],
@@ -56,7 +57,7 @@ GuitarTrainer.FretboardView = Ember.Object.extend({
 	dotPositions: function(){
 		var fretPositions = this.get("fretPositions");
 		var numFrets = fretPositions.length;
-		var dotFrets = [3, 5, 7, 9, 12, 15, 17, 19, 21, 24];
+		var dotFrets =this.get("dotFrets");
 		var i, len = dotFrets.length;
 		var positions = [];
 		for(i=0; i<len; i++){
