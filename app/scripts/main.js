@@ -17,7 +17,7 @@ GuitarTrainer.ready = function(){
 	});
 
 	function spawnRandomTarget(){
-		track.spawnTarget(frequencyTarget, GuitarTrainer.FrequencyTargetView, Math.floor(Math.random()*5), Math.floor(Math.random()*22));
+		track.spawnTarget(frequencyTarget, GuitarTrainer.FrequencyTargetView, Math.floor(Math.random()*6), Math.floor(Math.random()*24));
 	}
 
 	function render(){
