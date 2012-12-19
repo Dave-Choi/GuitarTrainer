@@ -46,11 +46,13 @@ GuitarTrainer.TrackView = Ember.Object.extend({
 		var stringSpacing = fretboardView.get("stringSpacing");
 		var position = {x: fretboardView.fretCenter(fretIndex), y: stringSpacing * stringIndex, z: -this.get("length")};
 		var dimensions = {x: fretboardView.fretWidth(fretIndex), y: fretboardView.get("stringSpacing"), z: fretboardView.get("stringSpacing")};
+		var color = fretboardView.stringColor(stringIndex);
 		var targetView = viewType.create({
 			world: world,
 			target: target,
 			position: position,
-			dimensions: dimensions
+			dimensions: dimensions,
+			color: color
 		});
 		targetView.draw();
 		var node = targetView.get("sceneNode");

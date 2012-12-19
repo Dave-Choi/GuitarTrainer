@@ -91,6 +91,15 @@ GuitarTrainer.FretboardView = Ember.Object.extend({
 		return (leftFretPos + rightFretPos) / 2;
 	},
 
+	stringColor: function(stringIndex){
+		var flipped = this.get("flipped");
+		var colors = this.get("stringColors");
+		if(flipped){
+			stringIndex = this.get("instrument").get("strings").length - stringIndex - 1;
+		}
+		return colors[stringIndex];
+	},
+
 	makeStrings: function(){
 		var world = this.get("world");
 		var halfPi = Math.PI/2;
