@@ -122,31 +122,35 @@ GuitarTrainer.FretboardView = Ember.Object.extend({
 	},
 
 	makeFrets: function(){
-		// Do tracks and frets, because they have the same spacing, and it's dumb to do the math again.
 		var world = this.get("world");
 		var fretPositions = this.get("fretPositions");
 		var len = fretPositions.length;
+		var mergedGeometry = new THREE.Geometry();
 
 		for(var i=0; i<len; i++){
 			var x = fretPositions[i];
-
 			var fret = GuitarTrainer.ShapeFactory.cube({width: 0.1, height: 3.5, depth: 0.1, color: 0x888888});
 			fret.position = {x: x, y: 1.4, z: 0};
-			world.add(fret);
+			THREE.GeometryUtils.merge(mergedGeometry, fret);
 		}
+		var mesh = new THREE.Mesh(mergedGeometry, new THREE.MeshPhongMaterial({color: 0x888888}));
+		world.add(mesh);
 	},
 
 	makeDots: function(){
 		var world = this.get("world");
 		var dotPositions = this.get("dotPositions");
 		var len = dotPositions.length;
+		var mergedGeometry = new THREE.Geometry();
 
 		for(var i=0; i<len; i++){
 			var x = dotPositions[i];
 			var dot = GuitarTrainer.ShapeFactory.sphere({color: 0xff0000, radius: 0.1});
 			dot.position = {x: x, y: 1.4, z: -0.1};
-			world.add(dot);
+			THREE.GeometryUtils.merge(mergedGeometry, dot);
 		}
+		var mesh = new THREE.Mesh(mergedGeometry, new THREE.MeshPhongMaterial({color: 0xff0000}));
+		world.add(mesh);
 	},
 
 	drawInstrument: function(){
