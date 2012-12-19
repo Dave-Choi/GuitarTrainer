@@ -5,6 +5,7 @@ GuitarTrainer.TrackView = Ember.Object.extend({
 	length: 100,
 	delay: 5000, // Time (ms) it will take from the moment the note appears until it's time to hit it.
 	time: 0, // Used to evaluate when to create targets
+	mesh: null,
 
 	init: function(){
 		var world = this.get("world");
@@ -12,12 +13,16 @@ GuitarTrainer.TrackView = Ember.Object.extend({
 		var trackLength = this.get("length");
 		var trackOffset = -trackLength/2;
 		var len = fretPositions.length;
+		var mergedGeometry = new THREE.Geometry();
 		for(var i=0; i<len; i++){
 			var x = fretPositions[i];
 			var track = GuitarTrainer.ShapeFactory.cube({width: 0.05, height: 0.05, depth: trackLength, color: 0xaaaaff});
 			track.position = {x: x, y: 0, z: trackOffset};
-			world.add(track);
+			THREE.GeometryUtils.merge(mergedGeometry, track);
 		}
+		var mesh = new THREE.Mesh(mergedGeometry, new THREE.MeshPhongMaterial({color:  0xaaaaff}));
+		this.set("mesh", mesh);
+		world.add(mesh);
 	},
 
 	spawnTarget: function(target, viewType, stringIndex, fretIndex){
