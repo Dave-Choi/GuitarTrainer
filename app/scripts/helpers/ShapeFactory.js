@@ -1,5 +1,11 @@
 GuitarTrainer.ShapeFactory = Ember.Object.create({
-	// TODO: Refactor this into sexy abstract stuff.  Too tired to think right now.
+	/*
+	TODO:
+		- Refactor this into sexy abstract stuff.  Too tired to think right now.
+		- Separate geometry from materials
+			- Saves time on building merged geometries.
+		- Cache materials
+	*/
 	sphere: function(args){
 		args = args || {};
 		var defaults = {
