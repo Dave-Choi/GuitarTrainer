@@ -74,20 +74,20 @@ GuitarTrainer.FretboardView = Ember.Object.extend({
 	fretWidth: function(fretIndex){
 		var fretPositions = this.get("fretPositions");
 		var numFrets = fretPositions.length;
-		if(fretIndex < 0 || fretIndex > numFrets - 1){
+		if(fretIndex <= 0 || fretIndex > numFrets - 1){
 			return 0;
 		}
-		var leftFretPos = fretPositions[fretIndex], rightFretPos = fretPositions[fretIndex + 1];
+		var leftFretPos = fretPositions[fretIndex - 1], rightFretPos = fretPositions[fretIndex];
 		return rightFretPos - leftFretPos;
 	},
 
 	fretCenter: function(fretIndex){
 		var fretPositions = this.get("fretPositions");
 		var numFrets = fretPositions.length;
-		if(fretIndex < 0 || fretIndex > numFrets - 1){
+		if(fretIndex <= 0 || fretIndex > numFrets - 1){
 			return 0;
 		}
-		var leftFretPos = fretPositions[fretIndex], rightFretPos = fretPositions[fretIndex + 1];
+		var leftFretPos = fretPositions[fretIndex - 1], rightFretPos = fretPositions[fretIndex];
 		return (leftFretPos + rightFretPos) / 2;
 	},
 
