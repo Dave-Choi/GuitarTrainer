@@ -20,6 +20,28 @@ GuitarTrainer.ready = function(){
 		track.spawnTarget(frequencyTarget, GuitarTrainer.FrequencyTargetView, Math.floor(Math.random()*6), Math.floor(Math.random()*24));
 	}
 
+	function spawnFreqTargetForCoordinates(instrument, stringIndex, fretIndex){
+		var note = instrument.get("strings")[stringIndex].get("notes")[fretIndex];
+		var target = GuitarTrainer.FrequencyTarget.create({
+			frequency: note.get("frequency")
+		});
+		track.spawnTarget(target, GuitarTrainer.FrequencyTargetView, stringIndex, fretIndex);
+	}
+
+	var AMajorScaleCoordinates = [
+		[5, 5], [5, 7],
+		[4, 4], [4, 5], [4, 7],
+		[3, 4], [3, 6], [3, 7],
+		[2, 4], [2, 6], [2, 7],
+		[1, 5], [1, 7],
+		[0, 4], [0, 5]
+	];
+
+	function spawnRandomMajorScaleTarget(){
+		var coordinates = AMajorScaleCoordinates[Math.floor(Math.random() * AMajorScaleCoordinates.length)];
+		spawnFreqTargetForCoordinates(GuitarTrainer.Guitar, coordinates[0], coordinates[1]);
+	}
+
 	function render(){
 		requestAnimationFrame(render);
 		//fretboard.update();
@@ -44,7 +66,7 @@ GuitarTrainer.ready = function(){
 			spawnRandomTarget();
 		}
 		if(e.keyCode == 69){ // E
-			world.turnRight();
+			spawnRandomMajorScaleTarget();
 		}
 		if(e.keyCode >= 48 && e.keyCode <= 57){ // Num keys
 			var keyVal = e.keyCode - 48;
