@@ -8,6 +8,7 @@ GuitarTrainer.FrequencyTargetView = Ember.Object.extend({
 
 	draw: function(){
 		var world = this.get("world");
+		var target = this.get("target");
 		var position = this.get("position");
 		var dimensions = this.get("dimensions");
 		var color = this.get("color");
@@ -15,5 +16,13 @@ GuitarTrainer.FrequencyTargetView = Ember.Object.extend({
 		node.position = position;
 		this.set("sceneNode", node);
 		world.add(node);
+	},
+
+	startTween: function(duration){
+		var node = this.get("sceneNode");
+		var target = this.get("target");
+		new TWEEN.Tween(node.position).to({x: node.position.x, y: node.position.y, z: 0}, duration).onUpdate(function(){
+			console.log(this);
+		}).start();
 	}
 });

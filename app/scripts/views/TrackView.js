@@ -55,7 +55,6 @@ GuitarTrainer.TrackView = Ember.Object.extend({
 			color: color
 		});
 		targetView.draw();
-		var node = targetView.get("sceneNode");
-		new TWEEN.Tween(node.position).to({x: node.position.x, y: node.position.y, z: 0}, this.get("delay")).start();
+		targetView.startTween(this.get("delay"));
 	}
 });
