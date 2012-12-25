@@ -1,5 +1,6 @@
 GuitarTrainer.FretboardView = Ember.Object.extend({
 	world: null,
+	threeNode: null,
 	instrument: null,
 	stringViews: null,
 	/*
@@ -21,6 +22,10 @@ GuitarTrainer.FretboardView = Ember.Object.extend({
 	init: function(){
 		this._super();
 		this.set("stringViews", []);
+		this.set("threeNode", new THREE.Object3D());
+		this.makeStrings();
+		this.makeFrets();
+		this.makeDots();
 	},
 
 	fretPositions: function(){
@@ -101,7 +106,7 @@ GuitarTrainer.FretboardView = Ember.Object.extend({
 	},
 
 	makeStrings: function(){
-		var world = this.get("world");
+		var threeNode = this.get("threeNode");
 		var halfPi = Math.PI/2;
 		var flipped = this.get("flipped");
 		var colors = this.get("stringColors");
@@ -117,7 +122,7 @@ GuitarTrainer.FretboardView = Ember.Object.extend({
 		for(var i=0; i<numStrings; i++){
 			var string = strings[i];
 			var newString = stringType.create({
-				world: world,
+				world: threeNode,
 				string: string,
 				fretPositions: fretPositions,
 				color: colors[i],
@@ -132,7 +137,7 @@ GuitarTrainer.FretboardView = Ember.Object.extend({
 	},
 
 	makeFrets: function(){
-		var world = this.get("world");
+		var threeNode = this.get("threeNode");
 		var fretPositions = this.get("fretPositions");
 		var len = fretPositions.length;
 		var mergedGeometry = new THREE.Geometry();
@@ -144,11 +149,11 @@ GuitarTrainer.FretboardView = Ember.Object.extend({
 			THREE.GeometryUtils.merge(mergedGeometry, fret);
 		}
 		var mesh = new THREE.Mesh(mergedGeometry, new THREE.MeshPhongMaterial({color: 0x888888}));
-		world.add(mesh);
+		threeNode.add(mesh);
 	},
 
 	makeDots: function(){
-		var world = this.get("world");
+		var threeNode = this.get("threeNode");
 		var dotPositions = this.get("dotPositions");
 		var len = dotPositions.length;
 		var mergedGeometry = new THREE.Geometry();
@@ -160,25 +165,7 @@ GuitarTrainer.FretboardView = Ember.Object.extend({
 			THREE.GeometryUtils.merge(mergedGeometry, dot);
 		}
 		var mesh = new THREE.Mesh(mergedGeometry, new THREE.MeshPhongMaterial({color: 0xff0000}));
-		world.add(mesh);
-	},
-
-	drawInstrument: function(){
-		this.makeStrings();
-		this.makeFrets();
-		this.makeDots();
-	},
-
-	panToFret: function(fret){
-		var world = this.get("world");
-		if(fret > this.numFrets){
-			fret = this.numFrets;
-		}
-		else if(fret < 0){
-			fret = 0;
-		}
-		var targetX = this.get("fretPositions")[fret];
-		world.panTo({x: targetX}, 200);
+		threeNode.add(mesh);
 	}
 });
 

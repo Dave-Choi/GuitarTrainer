@@ -7,11 +7,12 @@ GuitarTrainer.ready = function(){
 	// pitchDetectionNode is initialized in PitchDetectionNode.js right now.  This is total shit and needs to be reorganized.
 	//var fretboard = GuitarTrainer.HeatmapFretboardView.create({world: world, instrument: GuitarTrainer.Guitar, pitchDetectionNode: pitchDetectionNode});
 	var fretboard = GuitarTrainer.FretboardView.create({world: world, instrument: GuitarTrainer.Guitar, pitchDetectionNode: pitchDetectionNode});
-	fretboard.drawInstrument();
+	world.get("shiftingNode").add(fretboard.get("threeNode"));
+	var noteCount = 0;
 	var fretPositions = fretboard.get("fretPositions");
 	var stringSpacing = fretboard.get("stringSpacing");
 	var track = GuitarTrainer.TrackView.create({world: world, instrument: GuitarTrainer.Guitar, fretboardView: fretboard});
-
+	world.get("shiftingNode").add(track.get("threeNode"));
 	var frequencyTarget = GuitarTrainer.FrequencyTarget.create({
 		frequency: 440
 	});
@@ -25,7 +26,7 @@ GuitarTrainer.ready = function(){
 		var target = GuitarTrainer.FrequencyTarget.create({
 			frequency: note.get("frequency")
 		});
-		track.spawnTarget(target, GuitarTrainer.FrequencyTargetView, stringIndex, fretIndex);
+		track.spawnTarget(target, GuitarTrainer.FrequencyTargetView, stringIndex, fretIndex, noteCount++ * 15);
 	}
 
 	var AMajorScaleCoordinates = [
@@ -67,10 +68,6 @@ GuitarTrainer.ready = function(){
 		}
 		if(e.keyCode == 69){ // E
 			spawnRandomMajorScaleTarget();
-		}
-		if(e.keyCode >= 48 && e.keyCode <= 57){ // Num keys
-			var keyVal = e.keyCode - 48;
-			fretboard.panToFret(keyVal * 4);
 		}
 	});
 };

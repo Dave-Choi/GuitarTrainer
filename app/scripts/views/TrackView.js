@@ -1,5 +1,6 @@
 GuitarTrainer.TrackView = Ember.Object.extend({
 	world: null,
+	threeNode: null,
 	targets: null,
 	fretboardView: null,
 	length: 100,
@@ -8,7 +9,9 @@ GuitarTrainer.TrackView = Ember.Object.extend({
 	mesh: null,
 
 	init: function(){
-		var world = this.get("world");
+		var threeNode = new THREE.Object3D();
+		this.set("threeNode", threeNode);
+
 		var fretboardView = this.get("fretboardView");
 		var trackLength = this.get("length");
 		var trackOffset = -trackLength/2;
@@ -23,7 +26,6 @@ GuitarTrainer.TrackView = Ember.Object.extend({
 			THREE.GeometryUtils.merge(mergedGeometry, track);
 		}
 
-		var dotPositions = fretboardView.get("dotPositions");
 		var dotFrets = fretboardView.get("dotFrets");
 		var numDots = dotFrets.length;
 		for(i=0; i<numDots; i++){
@@ -37,14 +39,14 @@ GuitarTrainer.TrackView = Ember.Object.extend({
 
 		var mesh = new THREE.Mesh(mergedGeometry, new THREE.MeshLambertMaterial({color:  0xbbbbff}));
 		this.set("mesh", mesh);
-		world.add(mesh);
+		threeNode.add(mesh);
 	},
 
-	spawnTarget: function(target, viewType, stringIndex, fretIndex){
+	spawnTarget: function(target, viewType, stringIndex, fretIndex, z){
 		var world = this.get("world");
 		var fretboardView = this.get("fretboardView");
 		var stringSpacing = fretboardView.get("stringSpacing");
-		var position = {x: fretboardView.fretCenter(fretIndex), y: stringSpacing * stringIndex, z: -this.get("length")};
+		var position = {x: fretboardView.fretCenter(fretIndex), y: stringSpacing * stringIndex, z: -z};
 		var dimensions = {x: fretboardView.fretWidth(fretIndex), y: fretboardView.get("stringSpacing"), z: fretboardView.get("stringSpacing")};
 		var color = fretboardView.stringColor(stringIndex);
 		var targetView = viewType.create({
@@ -54,7 +56,6 @@ GuitarTrainer.TrackView = Ember.Object.extend({
 			dimensions: dimensions,
 			color: color
 		});
-		targetView.draw();
-		targetView.startTween(this.get("delay"));
+		world.add(targetView.get("threeNode"));
 	}
 });
