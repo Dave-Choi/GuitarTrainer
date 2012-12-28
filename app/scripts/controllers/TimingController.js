@@ -8,6 +8,12 @@
 	Shifting speed can be controlled via tempo, which will alter how many
 	units distance will be traversed per unit time.
 	tempo is specified in z per second
+
+	TODO: Time is being used to trigger Target events, which will cause problems
+	when authoring exercises, as time is tracked in absolute terms and
+	Targets should really be looking at the World.shiftingNode z position
+		- Add a property that converts time to Z, use it in timeChanged, and use
+		it for Target events (in TargetController)
 */
 
 GuitarTrainer.TimingController = Ember.Object.extend({
