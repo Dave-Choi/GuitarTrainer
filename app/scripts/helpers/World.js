@@ -20,9 +20,9 @@ GuitarTrainer.World = Ember.Object.extend({
 
 	camera: null,
 	camLight: null,
+	renderHooks: null, // Named callbacks called at the end of render calls
 
-	init: function(){
-		this._super();
+	setup3D: function(){
 		var $container = $("#exercise");
 		var height = $container.height(), width = $container.width();
 		var scene = new THREE.Scene();
@@ -59,8 +59,8 @@ GuitarTrainer.World = Ember.Object.extend({
 
 		var composer = new THREE.EffectComposer(renderer);
 		composer.addPass(renderPass);
-		composer.addPass(effectFXAA);
-		composer.addPass(effectBloom);
+		//ßcomposer.addPass(effectFXAA);
+		//composer.addPass(effectBloom);
 		composer.addPass(effectCopy);
 
 		this.set("renderer", renderer);
@@ -75,6 +75,23 @@ GuitarTrainer.World = Ember.Object.extend({
 		//renderer.setClearColorHex(0x000000, renderer.getClearAlpha());
 
 		renderer.render(scene, camera);
+	},
+
+	init: function(){
+		this._super();
+		this.setup3D();
+
+		this.set("renderHooks", {});
+	},
+
+	registerRenderHook: function(name, obj, callback){
+		var renderHooks = this.get("renderHooks");
+		renderHooks[name] = {obj: obj, callback: callback};
+	},
+
+	removeRenderHook: function(name){
+		var renderHooks = this.get("renderHooks");
+		delete renderHooks[name];
 	},
 
 	tweenPosBy: function(obj, vector, time, easing){
@@ -92,6 +109,13 @@ GuitarTrainer.World = Ember.Object.extend({
 		var composer = this.get("composer");
 		TWEEN.update();
 		renderer.clear();
+
+		var renderHooks = this.get("renderHooks");
+		for(var k in renderHooks){
+			var hook = renderHooks[k];
+			hook.callback.apply(hook.obj);
+		}
+
 		composer.render();
 	},
 
@@ -121,6 +145,11 @@ GuitarTrainer.World = Ember.Object.extend({
 	shiftBy: function(vector, time){
 		var shiftingNode = this.get("shiftingNode");
 		this.tweenPosBy(shiftingNode, vector, time, TWEEN.Easing.Linear.None);
+	},
+
+	shiftToZ: function(targetZ){
+		var shiftingNode = this.get("shiftingNode");
+		shiftingNode.position.z = targetZ;
 	},
 
 	panRight: function(){

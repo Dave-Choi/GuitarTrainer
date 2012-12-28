@@ -16,6 +16,14 @@ GuitarTrainer.ready = function(){
 	var frequencyTarget = GuitarTrainer.FrequencyTarget.create({
 		frequency: 440
 	});
+	var timingController = GuitarTrainer.TimingController.create({
+		world: world,
+		tempo: 20
+	});
+	var targetController = GuitarTrainer.TargetController.create({
+		timingController: timingController,
+		pitchDetectionNode: pitchDetectionNode
+	});
 
 	function spawnRandomTarget(){
 		track.spawnTarget(frequencyTarget, GuitarTrainer.FrequencyTargetView, Math.floor(Math.random()*6), Math.floor(Math.random()*24));
@@ -23,10 +31,17 @@ GuitarTrainer.ready = function(){
 
 	function spawnFreqTargetForCoordinates(instrument, stringIndex, fretIndex){
 		var note = instrument.get("strings")[stringIndex].get("notes")[fretIndex];
+		var z = noteCount++ * 15;
+		var tempo = timingController.get("tempo");
+		var time = z*1000/tempo; // in ms
 		var target = GuitarTrainer.FrequencyTarget.create({
-			frequency: note.get("frequency")
+			frequency: note.get("frequency"),
+			displayTime: time,
+			startTime: time - 500,
+			duration: 1000
 		});
-		track.spawnTarget(target, GuitarTrainer.FrequencyTargetView, stringIndex, fretIndex, noteCount++ * 15);
+		track.spawnTarget(target, GuitarTrainer.FrequencyTargetView, stringIndex, fretIndex, z);
+		targetController.addTarget(target);
 	}
 
 	var AMajorScaleCoordinates = [
@@ -58,10 +73,10 @@ GuitarTrainer.ready = function(){
 			world.panRight();
 		}
 		if(e.keyCode == 83){ // S
-			world.zoomOut();
+			timingController.stop();
 		}
 		if(e.keyCode == 87){ // W
-			world.zoomIn();
+			timingController.play();
 		}
 		if(e.keyCode == 81){ // Q
 			spawnRandomTarget();
@@ -70,4 +85,8 @@ GuitarTrainer.ready = function(){
 			spawnRandomMajorScaleTarget();
 		}
 	});
+
+	for(var i=0; i<50; i++){
+		spawnRandomMajorScaleTarget();
+	}
 };

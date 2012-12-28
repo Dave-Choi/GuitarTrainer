@@ -7,7 +7,16 @@
 GuitarTrainer.Target = Ember.Object.extend({
 	displayTime: 0,	// The time when the target will cross the fretboard
 	startTime: 0,	// The time to begin listening for a hit
-	duration: 1,	// The length of time the player has after startTime to hit the target
+	duration: 1,	// The length of time the player has after startTime to hit the target (in ms)
+	hasBeenHit: false,
+
+	stopTime: function(){
+		return this.get("startTime") + this.get("duration");
+	}.property("startTime, duration"),
+
+	shouldListenAtTime: function(time){
+		return (time >= this.get("startTime") && time <= this.get("stopTime"));
+	},
 
 	listen: function(){
 		/*
@@ -20,14 +29,20 @@ GuitarTrainer.Target = Ember.Object.extend({
 
 GuitarTrainer.FrequencyTarget = GuitarTrainer.Target.extend({
 	frequency: 0,
-	threshold: 1,	/*
-					I don't actually know what units these are in, but this is the minimum
-					value in the FFT bucket that will register as a hit.
-					*/
+	threshold: 0.01, /*
+		I don't actually know what units these are in, but this is the minimum
+		value in the FFT bucket that will register as a hit.
+	*/
 	listen: function(pitchDetectionNode){
 		this._super();
 		var frequency = this.get("frequency");
+		var threshold = this.get("threshold");
 		var amp = pitchDetectionNode.frequencyAmplitude(frequency);
-		return (amp >= threshold);
+		var result = (amp >= threshold);
+		if(result){
+			this.set("hasBeenHit", true);
+			console.log("hit with " + amp);
+		}
+		return result;
 	}
 });
