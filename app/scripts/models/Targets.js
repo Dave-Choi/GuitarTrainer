@@ -41,7 +41,7 @@ GuitarTrainer.FrequencyTarget = GuitarTrainer.Target.extend({
 		var result = (amp >= threshold);
 		if(result){
 			this.set("hasBeenHit", true);
-			console.log("hit with " + amp);
+			console.log("hit " + frequency + " with " + amp);
 		}
 		return result;
 	}

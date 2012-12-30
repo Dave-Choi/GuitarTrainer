@@ -5,8 +5,8 @@ var GuitarTrainer = Ember.Application.create();
 GuitarTrainer.ready = function(){
 	var world = GuitarTrainer.World.create();
 	// pitchDetectionNode is initialized in PitchDetectionNode.js right now.  This is total shit and needs to be reorganized.
-	//var fretboard = GuitarTrainer.HeatmapFretboardView.create({world: world, instrument: GuitarTrainer.Guitar, pitchDetectionNode: pitchDetectionNode});
-	var fretboard = GuitarTrainer.FretboardView.create({world: world, instrument: GuitarTrainer.Guitar, pitchDetectionNode: pitchDetectionNode});
+	var fretboard = GuitarTrainer.HeatmapFretboardView.create({world: world, instrument: GuitarTrainer.Guitar, pitchDetectionNode: pitchDetectionNode});
+	//var fretboard = GuitarTrainer.FretboardView.create({world: world, instrument: GuitarTrainer.Guitar, pitchDetectionNode: pitchDetectionNode});
 	world.get("shiftingNode").add(fretboard.get("threeNode"));
 	var noteCount = 0;
 	var fretPositions = fretboard.get("fretPositions");
@@ -18,7 +18,7 @@ GuitarTrainer.ready = function(){
 	});
 	var timingController = GuitarTrainer.TimingController.create({
 		world: world,
-		tempo: 20
+		tempo: 10
 	});
 	var targetController = GuitarTrainer.TargetController.create({
 		timingController: timingController,
@@ -35,7 +35,7 @@ GuitarTrainer.ready = function(){
 		var tempo = timingController.get("tempo");
 		var time = z*1000/tempo; // in ms
 		var target = GuitarTrainer.FrequencyTarget.create({
-			frequency: note.get("frequency"),
+			frequency: note.get("frequency"), // This is messed up from strings being flipped however they're being looked up.
 			displayTime: time,
 			startTime: time - 500,
 			duration: 1000
@@ -60,7 +60,7 @@ GuitarTrainer.ready = function(){
 
 	function render(){
 		requestAnimationFrame(render);
-		//fretboard.update();
+		//fretboard.update(); // Necessary for heatmap -- Should probably hook into world rendering
 		world.render();
 	}
 	requestAnimationFrame(render);

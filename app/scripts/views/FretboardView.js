@@ -173,6 +173,12 @@ GuitarTrainer.HeatmapFretboardView = GuitarTrainer.FretboardView.extend({
 	pitchDetectionNode: null,
 	stringType: GuitarTrainer.HeatmapStringView,
 
+	init: function(){
+		this._super();
+		var world = this.get("world");
+		world.registerRenderHook("HeatmapFretboardViewUpdate", this, this.update);
+	},
+
 	update: function(){
 		var strings = this.get("stringViews");
 		var pdNode = this.get("pitchDetectionNode");

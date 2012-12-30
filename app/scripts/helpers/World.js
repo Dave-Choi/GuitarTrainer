@@ -59,8 +59,8 @@ GuitarTrainer.World = Ember.Object.extend({
 
 		var composer = new THREE.EffectComposer(renderer);
 		composer.addPass(renderPass);
-		//ßcomposer.addPass(effectFXAA);
-		//composer.addPass(effectBloom);
+		composer.addPass(effectFXAA);
+		composer.addPass(effectBloom);
 		composer.addPass(effectCopy);
 
 		this.set("renderer", renderer);
