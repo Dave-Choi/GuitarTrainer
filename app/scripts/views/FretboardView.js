@@ -96,15 +96,6 @@ GuitarTrainer.FretboardView = Ember.Object.extend({
 		return (leftFretPos + rightFretPos) / 2;
 	},
 
-	stringColor: function(stringIndex){
-		var flipped = this.get("flipped");
-		var colors = this.get("stringColors");
-		if(flipped){
-			stringIndex = this.get("instrument").get("strings").length - stringIndex - 1;
-		}
-		return colors[stringIndex];
-	},
-
 	makeStrings: function(){
 		var threeNode = this.get("threeNode");
 		var halfPi = Math.PI/2;
@@ -166,6 +157,15 @@ GuitarTrainer.FretboardView = Ember.Object.extend({
 		}
 		var mesh = new THREE.Mesh(mergedGeometry, new THREE.MeshPhongMaterial({color: 0xff0000}));
 		threeNode.add(mesh);
+	},
+
+	posForCoordinates: function(stringIndex, fretIndex){
+		/*
+			The stringIndex is with respect to the instrument,
+			and the spacial coordinates are dependent on whether the strings are flipped
+		*/
+		var y = this.get("stringPositions")[stringIndex];
+		return {x: this.fretCenter(fretIndex), y: y, z: 0};
 	}
 });
 
