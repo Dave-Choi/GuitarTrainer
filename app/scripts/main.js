@@ -5,7 +5,7 @@ var GuitarTrainer = Ember.Application.create();
 GuitarTrainer.ready = function(){
 	var world = GuitarTrainer.World.create();
 	// pitchDetectionNode is initialized in PitchDetectionNode.js right now.  This is total shit and needs to be reorganized.
-	var fretboard = GuitarTrainer.HeatmapFretboardView.create({world: world, instrument: GuitarTrainer.Guitar, pitchDetectionNode: pitchDetectionNode});
+	var fretboard = GuitarTrainer.HeatmapFretboardView.create({world: world, instrument: GuitarTrainer.Guitar, pitchDetectionNode: pitchDetectionNode, flipped: true});
 	//var fretboard = GuitarTrainer.FretboardView.create({world: world, instrument: GuitarTrainer.Guitar, pitchDetectionNode: pitchDetectionNode});
 	world.get("shiftingNode").add(fretboard.get("threeNode"));
 	var noteCount = 0;
@@ -45,12 +45,12 @@ GuitarTrainer.ready = function(){
 	}
 
 	var AMajorScaleCoordinates = [
-		[5, 5], [5, 7],
-		[4, 4], [4, 5], [4, 7],
-		[3, 4], [3, 6], [3, 7],
-		[2, 4], [2, 6], [2, 7],
-		[1, 5], [1, 7],
-		[0, 4], [0, 5]
+				[0, 5],			[0, 7],
+		[1, 4],	[1, 5],			[1, 7],
+		[2, 4],			[2, 6], [2, 7],
+		[3, 4],			[3, 6], [3, 7],
+				[4, 5],			[4, 7],
+		[5, 4],	[5, 5]
 	];
 
 	function spawnRandomMajorScaleTarget(){
@@ -60,7 +60,6 @@ GuitarTrainer.ready = function(){
 
 	function render(){
 		requestAnimationFrame(render);
-		//fretboard.update(); // Necessary for heatmap -- Should probably hook into world rendering
 		world.render();
 	}
 	requestAnimationFrame(render);
