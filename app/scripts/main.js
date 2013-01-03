@@ -37,8 +37,8 @@ GuitarTrainer.ready = function(){
 		var target = GuitarTrainer.FrequencyTarget.create({
 			frequency: note.get("frequency"), // This is messed up from strings being flipped however they're being looked up.
 			displayTime: time,
-			startTime: time - 500,
-			duration: 1000
+			startTime: time - 125,
+			duration: 250
 		});
 		track.spawnTarget(target, GuitarTrainer.FrequencyTargetView, stringIndex, fretIndex, z);
 		targetController.addTarget(target);
