@@ -15,7 +15,10 @@ GuitarTrainer.ShapeFactory = Ember.Object.create({
 			rings: 15
 		};
 		function getArg(name){
-			return args[name] || defaults[name];
+			if(typeof args.name === "undefined"){
+				return args[name];
+			}
+			return defaults[name];
 		}
 		var material = new THREE.MeshPhongMaterial({
 			color: getArg("color")
@@ -40,7 +43,10 @@ GuitarTrainer.ShapeFactory = Ember.Object.create({
 			openEnded: false
 		};
 		function getArg(name){
-			return args[name] || defaults[name];
+			if(typeof args.name === "undefined"){
+				return args[name];
+			}
+			return defaults[name];
 		}
 		var material = new THREE.MeshPhongMaterial({
 			color: getArg("color")
@@ -68,7 +74,10 @@ GuitarTrainer.ShapeFactory = Ember.Object.create({
 			depthSegments: 1
 		};
 		function getArg(name){
-			return args[name] || defaults[name];
+			if(typeof args.name === "undefined"){
+				return args[name];
+			}
+			return defaults[name];
 		}
 		var material = new THREE.MeshPhongMaterial({
 			color: getArg("color")
