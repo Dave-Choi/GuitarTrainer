@@ -39,6 +39,175 @@ GuitarTrainer.PitchDetectionNode = Ember.Object.extend({
 		this.set("gauss", new WindowFunction(DSP.GAUSS));
 	},
 
+	spectrum: function(){
+		return this.get("fft").spectrum;
+	},
+
+	emptySpectrum: function(){
+		// Set all spectrum values to 0;
+		var spectrum = this.spectrum();
+		for(var i=spectrum.length-1; i>=0; i--){
+			spectrum[i] = 0;
+		}
+	},
+
+	binSpan: function(){
+		// Number of Hz that resolve into a given spectrum bin
+		return this.get("sampleRate") / this.get("binCount");
+	}.property("sampleRate", "binCount"),
+
+	binRange: function(binIndex){
+		var span = this.binSpan(binIndex);
+		var bottom = binIndex * span;
+		return {
+			low: bottom,
+			high: bottom + span
+		};
+	},
+
+	isPeak: function(binIndex, threshold){
+		/*
+			A bin is a peak if its value is greater than its neighboring bins' values.
+
+			threshold is a minimum value to count a bin as a peak
+		*/
+
+		var spectrum = this.spectrum();
+		var bin = spectrum[binIndex], leftBin, rightBin;
+
+		if(!bin || (bin < threshold)){
+			// bin can be 0 and !bin will evaluate to true,
+			// but it's not a peak then, anyway.
+			return false;
+		}
+
+		var count = spectrum.length;
+
+		if(binIndex === 0){
+			if(count == 1){
+				// This is the only bin, so I guess it's a peak
+				return true;
+			}
+			else{
+				// Compare the first bin to the second bin
+				bin = spectrum[0];
+				rightBin = spectrum[1];
+				return (bin > rightBin);
+			}
+		}
+		else if(binIndex === count - 1){
+			// Checking the last bin, and there's definitely more than one bin
+			bin = spectrum[count-1];
+			leftBin = spectrum[count-2];
+			return (bin > leftBin);
+		}
+		else{
+			// The target bin is somewhere in the middle, and guaranteed to have neighbors on left and right
+			bin = spectrum[binIndex];
+			leftBin = spectrum[binIndex - 1];
+			rightBin = spectrum[binIndex + 1];
+			return ((bin > leftBin) && (bin > rightBin));
+		}
+	},
+
+	peakIndices: function(){
+		// Returns the spectrum indices of peaks
+		var indices = [];
+		var spectrum = this.spectrum();
+		var i, len = spectrum.length;
+		var threshold = 0.01;
+		for(i=len-1; i>=0; i--){ // Ignore the ends for now
+			if(this.isPeak(i, threshold)){
+				indices.push(i);
+				i--; // If this is a peak, then it's neighbor can't be a peak, and we can save some iterations.
+			}
+		}
+		return indices;
+	},
+
+	peaks: function(){
+		/*
+			Returns the spectrum index and value of peaks identified by the
+			peakIndices() method.
+
+			This calls the peakIndices() method, which creates some overhead.
+			Room for optimization here.
+		*/
+		var values = [];
+		var indices = this.peakIndices();
+		var spectrum = this.get("fft").spectrum;
+		for(var i=0; i<indices.length; i++){
+			var index = indices[i];
+			values.push({
+				index: index,
+				value: spectrum[index]
+			});
+		}
+		return values;
+	},
+
+	isolatePeaks: function(){
+		// Find the peaks, empty the spectrum, restore the peaks
+		var peaks = this.peaks();
+		this.emptySpectrum();
+		var spectrum = this.spectrum();
+
+		for(var i=peaks.length-1; i>=0; i--){
+			var peak = peaks[i];
+			spectrum[peak.index] = peak.value;
+		}
+	},
+
+	estimatePeakFrequency: function(peakIndex){
+		/*
+			Estimates a specific frequency for a peak bin depending on its neighbors
+
+			In general, take the difference between the peak and its low neighbor
+			as the scale, and divide the difference between the two neighbors by the scale
+			to get a percentage bias toward the high neighbor.
+
+
+			e.g.
+			==========				low (10)
+			====================	peak (20)
+			===============			high (15)
+
+			scale = peak - low
+			diff = high - low
+			bias = diff / scale
+
+			Say the peak bin ranges from 10 to 20 Hz, with a 50% bias toward higher frequency,
+			estimate the peak frequency to be 15 (bin middle) + 2.5 (50% of half the bin range)
+			or 17.5 Hz
+
+			When bin values are very close to each other, this algorithm can give weird results,
+			but if the peaks are that poorly pronounced, any estimation isn't really good.
+		*/
+		var spectrum = this.spectrum();
+		var center = spectrum[peakIndex];
+		var left = spectrum[peakIndex-1] || 0;  // Default an undefined bin to 0
+		var right = spectrum[peakIndex+1] || 0;
+
+		var range = this.binRange(peakIndex);
+		var rangeMagnitude = range.high - range.low;
+		var radius = rangeMagnitude / 2;
+		var centerFreq = range.low + radius;
+
+		var scale, diff;
+		if(left < right){ // Bias toward the right (higher frequencies)
+			scale = center - left;
+			diff = right - left;
+			bias = diff / scale;
+			return centerFreq + (radius * bias);
+		}
+		else{ // Bias toward the left (lower frequencies)
+			scale = center - right;
+			diff = left - right;
+			bias = diff / scale;
+			return centerFreq - (radius * bias);
+		}
+	},
+
 	processingCallback: function(e){
 		var inputBuffer = e.inputBuffer.getChannelData(0);
 		var parent = this.parentNode;
@@ -46,7 +215,8 @@ GuitarTrainer.PitchDetectionNode = Ember.Object.extend({
 		var sampleCopy = this.parentNode.buffer.get("samples").slice(0);
 		parent.gauss.process(sampleCopy);
 		parent.fft.forward(sampleCopy);
-		//drawSpectrum(parent.fft.spectrum, 20, 1400);
+
+		parent.isolatePeaks();
 	},
 
 	setupNodes: function(context){
@@ -73,8 +243,14 @@ GuitarTrainer.PitchDetectionNode = Ember.Object.extend({
 		this.source.connect(firstNode);
 	}.observes("source"),
 
+	binCoeff: function(){
+		// Multiply by this to find out what bin a frequency is in
+		// Make it a property so it doesn't need to be recalculated
+		return this.get("binCount") / this.get("sampleRate");
+	}.property("binCount", "sampleRate"),
+
 	binForFreq: function(freq){
-		return Math.floor(freq * this.binCount / this.sampleRate);
+		return Math.floor(freq * this.get("binCoeff"));
 	},
 
 	detectFrequency: function(frequency, threshold){
@@ -137,6 +313,7 @@ GuitarTrainer.VisualPitchDetectionNode = GuitarTrainer.PitchDetectionNode.extend
 	highBin: function(){
 		return this.binForFreq(this.highFreq);
 	}.property("highFreq"),
+
 	lowBin: function(){
 		return this.binForFreq(this.lowFreq);
 	}.property("lowFreq"),
@@ -185,36 +362,3 @@ GuitarTrainer.VisualPitchDetectionNode = GuitarTrainer.PitchDetectionNode.extend
 		this.parentNode.drawSpectrum(this.parentNode.fft.spectrum);
 	}
 });
-
-
-	function micSuccess(stream){
-		console.log('mic connected');
-		sourceNode = context.createMediaStreamSource(stream);
-		pitchDetectionNode.set("source", sourceNode);
-	}
-
-	function micFailure(){
-		console.log('mic connection failure');
-	}
-
-	function connectMic(){
-		navigator.webkitGetUserMedia({audio: true}, micSuccess, function(){});
-	}
-
-	// create the audio context (chrome only for now)
-	var context = new webkitAudioContext();
-	var sourceNode;
-
-	var canvas = document.createElement("canvas");
-	canvas.id = "canvas";
-	canvas.width = 1250;
-	canvas.height = 100;
-	document.getElementById("mainThing").appendChild(canvas);
-
-	var pitchDetectionNode = GuitarTrainer.VisualPitchDetectionNode.create({"canvas": canvas});
-
-	connectMic();
-
-	$("#checkOpenA").click(function(){
-		console.log(pitchDetectionNode.detectFrequency(110, 0.01));
-	});

@@ -3,6 +3,35 @@
 var GuitarTrainer = Ember.Application.create();
 
 GuitarTrainer.ready = function(){
+	function micSuccess(stream){
+		console.log('mic connected');
+		sourceNode = context.createMediaStreamSource(stream);
+		pitchDetectionNode.set("source", sourceNode);
+	}
+
+	function micFailure(){
+		console.log('mic connection failure');
+	}
+
+	function connectMic(){
+		navigator.webkitGetUserMedia({audio: true}, micSuccess, function(){});
+	}
+
+	// create the audio context (chrome only for now)
+	var context = new webkitAudioContext();
+	var sourceNode;
+
+	var canvas = document.createElement("canvas");
+	canvas.id = "canvas";
+	canvas.width = 1250;
+	canvas.height = 100;
+	document.getElementById("mainThing").appendChild(canvas);
+
+	var pitchDetectionNode = GuitarTrainer.VisualPitchDetectionNode.create({canvas: canvas});
+
+	connectMic();
+
+
 	var world = GuitarTrainer.World.create();
 	// pitchDetectionNode is initialized in PitchDetectionNode.js right now.  This is total shit and needs to be reorganized.
 	var fretboard = GuitarTrainer.HeatmapFretboardView.create({world: world, instrument: GuitarTrainer.Guitar, pitchDetectionNode: pitchDetectionNode, flipped: true});
