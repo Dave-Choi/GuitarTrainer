@@ -17,6 +17,7 @@
 	in a rhythm game.
 
 	Requires dsp.js
+	Requires GuitarTrainer.SampleBuffer
 */
 
 GuitarTrainer.PitchDetectionNode = Ember.Object.extend({
@@ -57,7 +58,7 @@ GuitarTrainer.PitchDetectionNode = Ember.Object.extend({
 	}.property("sampleRate", "binCount"),
 
 	binRange: function(binIndex){
-		var span = this.binSpan(binIndex);
+		var span = this.get("binSpan");
 		var bottom = binIndex * span;
 		return {
 			low: bottom,
@@ -183,6 +184,11 @@ GuitarTrainer.PitchDetectionNode = Ember.Object.extend({
 			When bin values are very close to each other, this algorithm can give weird results,
 			but if the peaks are that poorly pronounced, any estimation isn't really good.
 		*/
+
+		if(!this.isPeak(peakIndex)){ // Not a peak, don't bother
+			return 0;
+		}
+
 		var spectrum = this.spectrum();
 		var center = spectrum[peakIndex];
 		var left = spectrum[peakIndex-1] || 0;  // Default an undefined bin to 0
@@ -193,7 +199,7 @@ GuitarTrainer.PitchDetectionNode = Ember.Object.extend({
 		var radius = rangeMagnitude / 2;
 		var centerFreq = range.low + radius;
 
-		var scale, diff;
+		var scale, diff, bias;
 		if(left < right){ // Bias toward the right (higher frequencies)
 			scale = center - left;
 			diff = right - left;

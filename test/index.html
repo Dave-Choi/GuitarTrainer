@@ -26,24 +26,22 @@
   <script src="../app/scripts/vendor/jquery.min.js"></script>
   <script src="../app/scripts/vendor/handlebars-1.0.0.beta.6.js"></script>
   <script src="../app/scripts/vendor/ember-1.0.pre.min.js"></script>
+
   <script src="../app/scripts/helpers/DMusic.js"></script>
+
+  <script>
+    // Set up requisite GuitarTrainer object
+    var GuitarTrainer = Ember.Application.create();
+  </script>
+
+  <script src="../app/scripts/vendor/dsp.js"></script>
+
+  <script src="../app/scripts/helpers/SampleBuffer.js"></script>
+  <script src="../app/scripts/helpers/PitchDetectionNode.js"></script>
 
   <!-- include spec files here... -->
   <script src="test-DMusic.js"></script>
-  <script>
-  // replace this by your own specs
-  (function() {
-    describe('Give it some context', function() {
-      describe('maybe a bit more context here', function() {
-
-        it('should run here few assertions', function() {
-
-        });
-
-      });
-    });
-  })();
-  </script>
+  <script src="test-PitchDetectionNode.js"></script>
 
   <!-- trigger the mocha runner -->
   <script src="runner/mocha.js"></script>
