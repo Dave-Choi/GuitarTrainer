@@ -15,11 +15,6 @@ GuitarTrainer.TargetController = Ember.Object.extend({
 	init: function(){
 		this._super();
 		this.set("targets", []);
-
-		var timingController = this.get("timingController");
-		if(timingController){
-			//timingController.addObserver("time", this.dispatch);
-		}
 	},
 
 	addTarget: function(target){
