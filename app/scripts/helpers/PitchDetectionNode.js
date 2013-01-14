@@ -32,6 +32,30 @@ GuitarTrainer.PitchDetectionNode = Ember.Object.extend({
 	binCount: 8192,		// affects buffer sizes, and frequency resolution
 	updateDelay: 2048,	// lower values mean more frequent updates, but too low can cause performance issues
 
+	// Properties for highlighting frequencies of interest
+	rootFreq: 82.407,
+	keyFreqs: function(){
+		var freqs = [];
+		// Set as many as will fit in the frequency bounds
+		var root = this.get("rootFreq");
+		var base = Math.pow(2, 1/12);
+		var highBound = this.get("highFreq");
+		while(root <= highBound){
+			freqs.push(root);
+			root *= base;
+		}
+		return freqs;
+	}.property("rootFreq"),
+
+	keyBins: function(){
+		var bins = [];
+		var freqs = this.get("keyFreqs");
+		var i, len = freqs.length;
+		for(i=0; i<len; i++){
+			bins.push(this.binForFreq(freqs[i]));
+		}
+		return bins;
+	}.property("keyFreqs"),
 
 	init: function(){
 		this._super();
@@ -290,31 +314,6 @@ GuitarTrainer.VisualPitchDetectionNode = GuitarTrainer.PitchDetectionNode.extend
 	//	Frequency bounds for rendering
 	highFreq: 1200,
 	lowFreq: 80,
-
-	// Properties for highlighting frequencies of interest
-	rootFreq: 82.407,
-	keyFreqs: function(){
-		var freqs = [];
-		// Set as many as will fit in the frequency bounds
-		var root = this.get("rootFreq");
-		var base = Math.pow(2, 1/12);
-		var highBound = this.get("highFreq");
-		while(root <= highBound){
-			freqs.push(root);
-			root *= base;
-		}
-		return freqs;
-	}.property("rootFreq"),
-
-	keyBins: function(){
-		var bins = [];
-		var freqs = this.get("keyFreqs");
-		var i, len = freqs.length;
-		for(i=0; i<len; i++){
-			bins.push(this.binForFreq(freqs[i]));
-		}
-		return bins;
-	}.property("keyFreqs"),
 
 	highBin: function(){
 		return this.binForFreq(this.highFreq);
