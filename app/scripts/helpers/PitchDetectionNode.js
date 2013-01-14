@@ -57,6 +57,10 @@ GuitarTrainer.PitchDetectionNode = Ember.Object.extend({
 		return bins;
 	}.property("keyFreqs"),
 
+	isKeyBin: function(binIndex){
+		return (this.get("keyBins").indexOf(binIndex) !== -1);
+	},
+
 	init: function(){
 		this._super();
 		this.set("buffer", GuitarTrainer.SampleBuffer.create());
@@ -171,14 +175,79 @@ GuitarTrainer.PitchDetectionNode = Ember.Object.extend({
 		return values;
 	},
 
-	isolatePeaks: function(){
+	peakRoundsTo: function(peakIndex){
+		/*
+			If the peak isn't a key bin, see if it can be rounded to one.
+			Returns the bin index to round to.
+
+			This is necessary when frequency resolution is too high, and
+			imprecision in the instrument makes precise hits on every frequency
+			target for a string impossible for a given tuning.
+
+			This will allow for sloppy fretting technique, however
+			(i.e. some unintentional bends will pass).
+		*/
+		if(!this.isPeak(peakIndex) || this.isKeyBin(peakIndex)){
+			// If this isn't a peak, or is already a key bin, just leave it alone.
+			return peakIndex;
+		}
+
+		var spectrum = this.spectrum();
+		if(peakIndex === 0){
+			if( this.isKeyBin(1) ){
+				// Round from the first bin to the second.
+				return 1;
+			}
+			return peakIndex;
+		}
+		else if(peakIndex === spectrum.length - 1){
+			if( this.isKeyBin(spectrum.length - 2) ){
+			// Round from the last bin to the second to last.
+				return spectrum.length - 2;
+			}
+			return peakIndex;
+		}
+		else{
+			// peakIndex can't be the first or last element at this point,
+			// so we're guaranteed to have elements on either side of peakIndex.
+			var leftIndex = peakIndex - 1;
+			var rightIndex = peakIndex + 1;
+			var hasLeftKey = this.isKeyBin(leftIndex);
+			var hasRightKey = this.isKeyBin(rightIndex);
+
+			if(hasLeftKey && hasRightKey){
+				// Peaks on either side.  Pick the one with the higher value
+				return (spectrum[leftIndex] > spectrum[rightIndex]) ? leftIndex : rightIndex;
+			}
+			else if(hasLeftKey){
+				return leftIndex;
+			}
+			else if(hasRightKey){
+				return rightIndex;
+			}
+			else{
+				return peakIndex;
+			}
+		}
+	},
+
+	isolatePeaks: function(doRounding){
 		// Find the peaks, empty the spectrum, restore the peaks
 		var peaks = this.peaks();
-		this.emptySpectrum();
 		var spectrum = this.spectrum();
 
-		for(var i=peaks.length-1; i>=0; i--){
-			var peak = peaks[i];
+		// Check the peaks and round them to key bins if they're close enough
+		var i, len = peaks.length;
+		var peak;
+		for(i=peaks.length-1; i>=0; i--){
+			peak = peaks[i];
+			peak.index = this.peakRoundsTo(peak.index);
+		}
+
+		this.emptySpectrum();
+
+		for(i=peaks.length-1; i>=0; i--){
+			peak = peaks[i];
 			spectrum[peak.index] = peak.value;
 		}
 	},
@@ -239,6 +308,15 @@ GuitarTrainer.PitchDetectionNode = Ember.Object.extend({
 	},
 
 	processingCallback: function(e){
+		/*
+			This stuff doesn't really need to happen most of the time.
+			
+			The PitchDetectionNode does a lot of processing that only
+			really needs to happen when it's being polled for detection.
+			
+			There's a lot of room to optimize here, but it might lead to
+			unevenness.
+		*/
 		var inputBuffer = e.inputBuffer.getChannelData(0);
 		var parent = this.parentNode;
 		parent.buffer.addSamples(inputBuffer);
