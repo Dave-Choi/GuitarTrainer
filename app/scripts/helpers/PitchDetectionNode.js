@@ -32,9 +32,21 @@ GuitarTrainer.PitchDetectionNode = Ember.Object.extend({
 	binCount: 8192,		// affects buffer sizes, and frequency resolution
 	updateDelay: 2048,	// lower values mean more frequent updates, but too low can cause performance issues
 
-	// Properties for highlighting frequencies of interest
+	// Properties for frequencies of special interest
 	rootFreq: 82.407,
+	highFreq: 1200,
+	lowFreq: 80,
+
+	highBin: function(){
+		return this.binForFreq(this.highFreq);
+	}.property("highFreq"),
+
+	lowBin: function(){
+		return this.binForFreq(this.lowFreq);
+	}.property("lowFreq"),
+
 	keyFreqs: function(){
+		// Musical note frequencies based on rootFreq
 		var freqs = [];
 		// Set as many as will fit in the frequency bounds
 		var root = this.get("rootFreq");
@@ -48,6 +60,7 @@ GuitarTrainer.PitchDetectionNode = Ember.Object.extend({
 	}.property("rootFreq"),
 
 	keyBins: function(){
+		// Bin indices containing key frequencies
 		var bins = [];
 		var freqs = this.get("keyFreqs");
 		var i, len = freqs.length;
@@ -60,6 +73,7 @@ GuitarTrainer.PitchDetectionNode = Ember.Object.extend({
 	isKeyBin: function(binIndex){
 		return (this.get("keyBins").indexOf(binIndex) !== -1);
 	},
+
 
 	init: function(){
 		this._super();
@@ -209,14 +223,14 @@ GuitarTrainer.PitchDetectionNode = Ember.Object.extend({
 		}
 		else{
 			// peakIndex can't be the first or last element at this point,
-			// so we're guaranteed to have elements on either side of peakIndex.
+			// so we're guaranteed to have bins on either side of peakIndex.
 			var leftIndex = peakIndex - 1;
 			var rightIndex = peakIndex + 1;
 			var hasLeftKey = this.isKeyBin(leftIndex);
 			var hasRightKey = this.isKeyBin(rightIndex);
 
 			if(hasLeftKey && hasRightKey){
-				// Peaks on either side.  Pick the one with the higher value
+				// Key bins on both sides.  Pick the one with the higher value.
 				return (spectrum[leftIndex] > spectrum[rightIndex]) ? leftIndex : rightIndex;
 			}
 			else if(hasLeftKey){
@@ -389,18 +403,6 @@ GuitarTrainer.PitchDetectionNode = Ember.Object.extend({
 	like the simplest way to hook in the functionality.
 */
 GuitarTrainer.VisualPitchDetectionNode = GuitarTrainer.PitchDetectionNode.extend({
-	//	Frequency bounds for rendering
-	highFreq: 1200,
-	lowFreq: 80,
-
-	highBin: function(){
-		return this.binForFreq(this.highFreq);
-	}.property("highFreq"),
-
-	lowBin: function(){
-		return this.binForFreq(this.lowFreq);
-	}.property("lowFreq"),
-
 	canvas: null,
 	ctx: function(){
 		return this.canvas.getContext("2d");
