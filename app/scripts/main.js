@@ -116,7 +116,7 @@ GuitarTrainer.ready = function(){
 
 	var lastIndex = 0;
 	var isScalingUp = true;
-	for(var i=0; i<50; i++){ // Scale up and down
+	for(var i=0; i<99; i++){ // Scale up and down
 		if(lastIndex == AMajorScaleCoordinates.length - 1 && isScalingUp){
 			isScalingUp = false;
 		}
