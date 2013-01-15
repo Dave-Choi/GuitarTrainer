@@ -47,7 +47,7 @@ GuitarTrainer.ready = function(){
 	});
 	var timingController = GuitarTrainer.TimingController.create({
 		world: world,
-		tempo: 10
+		tempo: 30
 	});
 	var targetController = GuitarTrainer.TargetController.create({
 		timingController: timingController,
@@ -60,7 +60,7 @@ GuitarTrainer.ready = function(){
 
 	function spawnFreqTargetForCoordinates(instrument, stringIndex, fretIndex){
 		var note = instrument.get("strings")[stringIndex].get("notes")[fretIndex];
-		var z = noteCount++ * 15;
+		var z = noteCount++ * 15 + 100;
 		var tempo = timingController.get("tempo");
 		var time = z*1000/tempo; // in ms
 		var target = GuitarTrainer.FrequencyTarget.create({
@@ -114,7 +114,22 @@ GuitarTrainer.ready = function(){
 		}
 	});
 
-	for(var i=0; i<50; i++){
-		spawnRandomMajorScaleTarget();
+	var lastIndex = 0;
+	var isScalingUp = true;
+	for(var i=0; i<50; i++){ // Scale up and down
+		if(lastIndex == AMajorScaleCoordinates.length - 1 && isScalingUp){
+			isScalingUp = false;
+		}
+		else if(lastIndex === 0 && !isScalingUp){
+			isScalingUp = true;
+		}
+		var coordinates = AMajorScaleCoordinates[lastIndex];
+		spawnFreqTargetForCoordinates(GuitarTrainer.Guitar, coordinates[0], coordinates[1]);
+		if(isScalingUp){
+			lastIndex++;
+		}
+		else{
+			lastIndex--;
+		}
 	}
 };
