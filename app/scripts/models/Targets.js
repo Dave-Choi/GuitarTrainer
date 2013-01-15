@@ -33,12 +33,24 @@ GuitarTrainer.FrequencyTarget = GuitarTrainer.Target.extend({
 		I don't actually know what units these are in, but this is the minimum
 		value in the FFT bucket that will register as a hit.
 	*/
+	hasFlattened: false, /*
+		Before checking for the target frequency, check that the bin hasn't been
+		spiking the whole time, otherwise notes can be hit and sustained very early,
+		instead of being plucked on time.
+	*/
+	flattenedThreshold: 0.001,
+
 	listen: function(pitchDetectionNode){
 		this._super();
 		var frequency = this.get("frequency");
 		var threshold = this.get("threshold");
+		var hasFlattened = this.get("hasFlattened");
 		var amp = pitchDetectionNode.frequencyAmplitude(frequency);
-		var result = (amp >= threshold);
+		if(!hasFlattened && amp < this.get("flattenedThreshold")){
+			this.set("hasFlattened", true);
+			return false;
+		}
+		var result = ( hasFlattened && (amp >= threshold) );
 		if(result){
 			this.set("hasBeenHit", true);
 			console.log("hit " + frequency + " with " + amp);
