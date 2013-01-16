@@ -1,0 +1,149 @@
+<html>
+<head>
+	<title>Guitar Trainer</title>
+	<style>
+		canvas{
+			border: solid black 1px;
+		}
+	</style>
+</head>
+<body>
+<div id="debug"></div>
+<canvas id="canvas" width="1250" height="700" style="display: block;"></canvas>
+<input id="snapshotButton" type="button" value="Snapshot" />
+</body>
+<script type="text/javascript" src="jquery-1.8.0.min.js"></script>
+<script src="dsp.js"></script>
+<script>
+	function debug(msg){
+		$("#debug").html(msg);
+	}
+
+	function filledArray(value, count){
+		var i;
+		var array = [];
+		for(i=count-1; i>=0; i--){
+			array[i] = value;
+		}
+		return array;
+	}
+
+	function micSuccess(stream){
+		sourceNode = context.createMediaStreamSource(stream);
+		console.log("Mic connection");
+		//sourceNode.connect(hp);
+		//hp.connect(lp);
+		//lp.connect(javascriptNode);
+
+		//analyser.connect(javascriptNode);
+
+		sourceNode.connect(javascriptNode);
+
+		//No connection to destination to prevent audio feedback during debugging.
+		//sourceNode.connect(context.destination);
+	}
+
+
+	function micError(){
+
+	}
+
+	function connectMic(){
+		navigator.webkitGetUserMedia({audio: true}, micSuccess, micError);
+	}
+
+	function setupAudioNodes() {
+
+		// setup a javascript node
+		javascriptNode = context.createJavaScriptNode(2048, 1, 1);
+		// connect to destination, else it isn't called
+		javascriptNode.connect(context.destination);
+
+		// create a buffer source node
+		connectMic();
+	}
+
+	// log if an error occurs
+	function onError(e) {
+		console.log(e);
+	}
+
+	function drawSpectrum(array, lowFreq, highFreq){
+		//debug(toString(array));
+		var i, len = array.length;
+		var spikeWidth = ctx.canvas.width/(len);
+		var canvasHeight = ctx.canvas.height;
+		//console.log(context.sampleRate + " - " + analyser.fftSize);
+		// 44100 - 2048
+		for (i=0; i<len; i++){
+			var x = i * spikeWidth;
+			var value = array[i];
+			var mag = value * 100000;
+			ctx.fillRect(x, canvasHeight, spikeWidth, -mag*mag);
+		}
+	};
+
+	// create the audio context (chrome only for now)
+	var context = new webkitAudioContext();
+	var lp = context.createBiquadFilter();
+	lp.type = lp.LOWPASS;
+	lp.frequency = 8000;
+	lp.Q = 0.1;
+
+	var hp = context.createBiquadFilter();
+	hp.type = hp.HIGHPASS;
+	hp.frequency = 20;
+	hp.Q = 0.1;
+
+	var sampleBuffer = filledArray(0, 8192);
+
+	var sourceNode;
+	var fft = new FFT(8192, 44100);
+	var javascriptNode;
+
+	var maxAmplitudes = [];
+
+	// get the context from the canvas to draw on
+	var ctx = $("#canvas").get()[0].getContext("2d");
+
+	// create a gradient for the fill. Note the strange
+	// offset, since the gradient is calculated based on
+	// the canvas, not the specific element we draw
+	var gradient = ctx.createLinearGradient(0,0,0,300);
+	gradient.addColorStop(1,'#5588ff');
+	gradient.addColorStop(0.75,'#ff0000');
+	gradient.addColorStop(0.25,'#ffff00');
+	gradient.addColorStop(0,'#ffffff');
+
+	// load the sound
+	setupAudioNodes();
+
+		// when the javascript node is called
+	// we use information from the fft
+	// to draw the volume
+	javascriptNode.onaudioprocess = function(e){
+		var inputBuffer = e.inputBuffer.getChannelData(0);
+		sampleBuffer.splice(0, inputBuffer.length);
+		//concat doesn't work normally, because inputBuffer is a float32 array
+		//sampleBuffer = sampleBuffer.concat(inputBuffer);
+		sampleBuffer = sampleBuffer.concat.apply(sampleBuffer, inputBuffer);
+
+		fft.forward(sampleBuffer);
+		var array = fft.spectrum;
+
+		// clear the current state
+		ctx.clearRect(0, 0, ctx.canvas.width, 700);
+
+		// set the fill style
+		ctx.fillStyle=gradient;
+
+		drawSpectrum(array, 20, 1400);
+
+	}
+
+	$("#snapshotButton").click(function(){
+		console.log(fft.spectrum);
+	});
+
+</script>
+</html>
