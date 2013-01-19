@@ -33,43 +33,42 @@ GuitarTrainer.ready = function(){
 
 
 	var world = GuitarTrainer.World.create();
-	// pitchDetectionNode is initialized in PitchDetectionNode.js right now.  This is total shit and needs to be reorganized.
+
 	var fretboard = GuitarTrainer.HeatmapFretboardView.create({world: world, instrument: GuitarTrainer.Guitar, pitchDetectionNode: pitchDetectionNode, flipped: true});
 	//var fretboard = GuitarTrainer.FretboardView.create({world: world, instrument: GuitarTrainer.Guitar, pitchDetectionNode: pitchDetectionNode});
+
 	world.get("shiftingNode").add(fretboard.get("threeNode"));
 	var noteCount = 0;
-	var fretPositions = fretboard.get("fretPositions");
-	var stringSpacing = fretboard.get("stringSpacing");
 	var track = GuitarTrainer.TrackView.create({world: world, instrument: GuitarTrainer.Guitar, fretboardView: fretboard});
 	world.get("shiftingNode").add(track.get("threeNode"));
-	var frequencyTarget = GuitarTrainer.FrequencyTarget.create({
-		frequency: 440
-	});
+
 	var timingController = GuitarTrainer.TimingController.create({
 		world: world,
-		tempo: 30
+		timeScale: 1.5,
+		distanceScale: 30
 	});
+
 	var targetController = GuitarTrainer.TargetController.create({
 		timingController: timingController,
 		pitchDetectionNode: pitchDetectionNode
 	});
 
-	function spawnRandomTarget(){
-		track.spawnTarget(frequencyTarget, GuitarTrainer.FrequencyTargetView, Math.floor(Math.random()*6), Math.floor(Math.random()*24));
-	}
+	var targetFactory = GuitarTrainer.TargetFactory.create({
+		world: world,
+		timingController: timingController,
+		fretboardView: fretboard
+	});
 
 	function spawnFreqTargetForCoordinates(instrument, stringIndex, fretIndex){
 		var note = instrument.get("strings")[stringIndex].get("notes")[fretIndex];
-		var z = noteCount++ * 15 + 100;
-		var tempo = timingController.get("tempo");
-		var time = z*1000/tempo; // in ms
+		var time = noteCount++ * 1000; // in ms
 		var target = GuitarTrainer.FrequencyTarget.create({
-			frequency: note.get("frequency"), // This is messed up from strings being flipped however they're being looked up.
+			frequency: note.get("frequency"),
 			displayTime: time,
-			startTime: time - 125,
+			leadTime: 125,
 			duration: 250
 		});
-		track.spawnTarget(target, GuitarTrainer.FrequencyTargetView, stringIndex, fretIndex, z);
+		targetFactory.spawnTarget(target, GuitarTrainer.FrequencyTargetView, stringIndex, fretIndex);
 		targetController.addTarget(target);
 	}
 
@@ -88,8 +87,8 @@ GuitarTrainer.ready = function(){
 	}
 
 	function render(){
-		requestAnimationFrame(render);
 		world.render();
+		requestAnimationFrame(render);
 	}
 	requestAnimationFrame(render);
 
@@ -107,10 +106,10 @@ GuitarTrainer.ready = function(){
 			timingController.play();
 		}
 		if(e.keyCode == 81){ // Q
-			spawnRandomTarget();
+
 		}
 		if(e.keyCode == 69){ // E
-			spawnRandomMajorScaleTarget();
+
 		}
 	});
 

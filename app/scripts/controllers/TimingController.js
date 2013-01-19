@@ -5,23 +5,37 @@
 	Functionality should be provided to jump to different times, and linearly
 	advance and rewind.
 
-	Shifting speed can be controlled via tempo, which will alter how many
-	units distance will be traversed per unit time.
-	tempo is specified in z per second
+	Shifting speed can be controlled via timeScale, which will alter how quickly
+	time passes.
 
-	TODO: Time is being used to trigger Target events, which will cause problems
-	when authoring exercises, as time is tracked in absolute terms and
-	Targets should really be looking at the World.shiftingNode z position
-		- Add a property that converts time to Z, use it in timeChanged, and use
-		it for Target events (in TargetController)
+	TODO: timeScale also affects targets' listening windows,
+	i.e. if the timeScale is 2, you have half as much time to hit the target.
+	This should probably be changed to use real time, possibly with:
+		lead time - how long before the displayTime it should start listening, in real time
+		duration - scaled-time duration of the target (e.g. sustain)
+		trail time - how long after the duration to keep listening, in real time
 */
 
 GuitarTrainer.TimingController = Ember.Object.extend({
 	world: null,
 	time: 0,
-	tempo: 10,
+	timeScale: 1, // How quickly time should pass, where 1 is real time, and 2 is twice real time
+
+	distanceScale: 15, // How much distance corresponds to one second of real time
+
 	timeStart: 0,
 	isPlaying: false,
+
+	scaledTime: function(){
+		return this.get("time") * this.get("timeScale");
+	}.property("time", "timeScale"),
+
+	zPosition: function(){
+		// zPosition is the position for the World's shiftingNode
+		var scaledTime = this.get("scaledTime");
+		var distanceScale = this.get("distanceScale");
+		return -scaledTime/1000 * distanceScale; // Divide by 1000 because tempo is in z units per second.
+	}.property("scaledTime", "distanceScale"),
 
 	init: function(){
 		this._super();
@@ -52,8 +66,6 @@ GuitarTrainer.TimingController = Ember.Object.extend({
 
 	timeChanged: function(){
 		var world = this.get("world");
-		var time = this.get("time");
-		var tempo = this.get("tempo");
-		world.shiftToZ(-time * tempo / 1000); // Divide by 1000 because tempo is in z units per second.
+		world.shiftToZ(this.get("zPosition"));
 	}.observes("time")
 });

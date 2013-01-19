@@ -6,9 +6,13 @@
 */
 GuitarTrainer.Target = Ember.Object.extend({
 	displayTime: 0,	// The time when the target will cross the fretboard
-	startTime: 0,	// The time to begin listening for a hit
-	duration: 1,	// The length of time the player has after startTime to hit the target (in ms)
+	leadTime: 125,	// How long before displayTime to begin listening
+	duration: 250,	// The length of time the player has after startTime to hit the target (in ms)
 	hasBeenHit: false,
+
+	startTime: function(){
+		return this.get("displayTime") - this.get("leadTime");
+	}.property("displayTime", "leadTime"),
 
 	stopTime: function(){
 		return this.get("startTime") + this.get("duration");
@@ -31,7 +35,7 @@ GuitarTrainer.FrequencyTarget = GuitarTrainer.Target.extend({
 	frequency: 0,
 	threshold: 0.01, /*
 		I don't actually know what units these are in, but this is the minimum
-		value in the FFT bucket that will register as a hit.
+		value in the FFT bin that will register as a hit.
 	*/
 	hasFlattened: false, /*
 		Before checking for the target frequency, check that the bin hasn't been
@@ -41,20 +45,31 @@ GuitarTrainer.FrequencyTarget = GuitarTrainer.Target.extend({
 	flattenedThreshold: 0.001,
 
 	listen: function(pitchDetectionNode){
+		/*
+			2 stage listen:
+
+				1.	Check that the note isn't sounding to start (i.e. sustaining from an early hit)
+					by checking that it's below flattenedThreshold.
+				2.	Check that the note is sounding above threshold.
+		*/
 		this._super();
 		var frequency = this.get("frequency");
 		var threshold = this.get("threshold");
 		var hasFlattened = this.get("hasFlattened");
 		var amp = pitchDetectionNode.frequencyAmplitude(frequency);
+
 		if(!hasFlattened && amp < this.get("flattenedThreshold")){
 			this.set("hasFlattened", true);
 			return false;
 		}
+
 		var result = ( hasFlattened && (amp >= threshold) );
+
 		if(result){
 			this.set("hasBeenHit", true);
 			console.log("hit " + frequency + " with " + amp);
 		}
+
 		return result;
 	}
 });

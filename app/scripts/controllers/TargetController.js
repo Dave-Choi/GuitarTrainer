@@ -27,15 +27,15 @@ GuitarTrainer.TargetController = Ember.Object.extend({
 		var pitchDetectionNode = this.get("pitchDetectionNode");
 		var targets = this.get("targets");
 		var i, len = targets.length;
-		time = timingController.get("time");
+		var scaledTime = timingController.get("scaledTime");
 		for(i=0; i<len; i++){
 			var target = targets[i];
 			if(target.get("hasBeenHit")){
 				continue;
 			}
-			if(target.shouldListenAtTime(time)){
+			if(target.shouldListenAtTime(scaledTime)){
 				var result = target.listen(pitchDetectionNode);
 			}
 		}
-	}.observes("timingController.time")
+	}.observes("timingController.scaledTime")
 });

@@ -40,27 +40,5 @@ GuitarTrainer.TrackView = Ember.Object.extend({
 		var mesh = new THREE.Mesh(mergedGeometry, new THREE.MeshLambertMaterial({color:  0xbbbbff}));
 		this.set("mesh", mesh);
 		threeNode.add(mesh);
-	},
-
-	spawnTarget: function(target, viewType, stringIndex, fretIndex, z){
-		var world = this.get("world");
-		var fretboardView = this.get("fretboardView");
-		var stringSpacing = fretboardView.get("stringSpacing");
-		var position = fretboardView.posForCoordinates(stringIndex, fretIndex);
-		position.z = -z;
-		var dimensions = {
-			x: fretboardView.fretWidth(fretIndex),
-			y: stringSpacing,
-			z: stringSpacing
-		};
-		var color = fretboardView.get("stringColors")[stringIndex];
-		var targetView = viewType.create({
-			world: world,
-			target: target,
-			position: position,
-			dimensions: dimensions,
-			color: color
-		});
-		world.add(targetView.get("threeNode"));
 	}
 });
