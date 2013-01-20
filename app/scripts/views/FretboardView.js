@@ -50,10 +50,10 @@ GuitarTrainer.FretboardView = Ember.Object.extend({
 		var numStrings = this.get("instrument").get("strings").length;
 		for(var i=0; i<numStrings; i++){
 			if(flipped){
-				positions.push((numStrings - i - 1) * stringSpacing);
+				positions.push((numStrings - i) * stringSpacing);
 			}
 			else{
-				positions.push(i * stringSpacing);
+				positions.push((i + 1) * stringSpacing);
 			}
 		}
 		return positions;
@@ -130,13 +130,18 @@ GuitarTrainer.FretboardView = Ember.Object.extend({
 	makeFrets: function(){
 		var threeNode = this.get("threeNode");
 		var fretPositions = this.get("fretPositions");
+		var stringSpacing = this.get("stringSpacing");
 		var len = fretPositions.length;
 		var mergedGeometry = new THREE.Geometry();
 
+		var numStrings = this.get("instrument").get("strings").length;
+		var fretHeight = stringSpacing * (numStrings + 1);
+		var fretY = fretHeight/2;
+
 		for(var i=0; i<len; i++){
 			var x = fretPositions[i];
-			var fret = GuitarTrainer.ShapeFactory.cube({width: 0.1, height: 3.5, depth: 0.1, color: 0x888888});
-			fret.position = {x: x, y: 1.4, z: 0};
+			var fret = GuitarTrainer.ShapeFactory.cube({width: 0.1, height: fretHeight, depth: 0.1, color: 0x888888});
+			fret.position = {x: x, y: fretY, z: 0};
 			THREE.GeometryUtils.merge(mergedGeometry, fret);
 		}
 		var mesh = new THREE.Mesh(mergedGeometry, new THREE.MeshPhongMaterial({color: 0x888888}));
@@ -148,11 +153,14 @@ GuitarTrainer.FretboardView = Ember.Object.extend({
 		var dotPositions = this.get("dotPositions");
 		var len = dotPositions.length;
 		var mergedGeometry = new THREE.Geometry();
+		var stringSpacing = this.get("stringSpacing");
+		var numStrings = this.get("instrument").get("strings").length;
+		var dotY = stringSpacing * (numStrings + 1) / 2; // This is a little higher than normal, because the camera perspective is high
 
 		for(var i=0; i<len; i++){
 			var x = dotPositions[i];
 			var dot = GuitarTrainer.ShapeFactory.sphere({color: 0xff0000, radius: 0.1});
-			dot.position = {x: x, y: 1.4, z: -0.1};
+			dot.position = {x: x, y: dotY, z: -0.1};
 			THREE.GeometryUtils.merge(mergedGeometry, dot);
 		}
 		var mesh = new THREE.Mesh(mergedGeometry, new THREE.MeshPhongMaterial({color: 0xff0000}));
@@ -161,6 +169,8 @@ GuitarTrainer.FretboardView = Ember.Object.extend({
 
 	posForCoordinates: function(stringIndex, fretIndex){
 		/*
+			Returns the position in the X-Y plane of the middle of a fret.
+			
 			The stringIndex is with respect to the instrument,
 			and the spacial coordinates are dependent on whether the strings are flipped
 		*/
