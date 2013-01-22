@@ -106,7 +106,7 @@ GuitarTrainer.ready = function(){
 			timingController.play();
 		}
 		if(e.keyCode == 81){ // Q
-
+			timingController.goToTime(0);
 		}
 		if(e.keyCode == 69){ // E
 

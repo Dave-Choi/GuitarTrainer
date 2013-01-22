@@ -5,13 +5,6 @@
 
 	Targets are queried on every render call, which means, polling should
 	be optimized to keep from bogging down performance.
-
-
-	TODO: Some optimizations have been added to reduce iteration over targets, but they
-	only work when time is progressing linearly.
-
-	If time is set explicitly (rewinding, jump to section, etc.),
-	isSorted and firstIndex will need to be reset.
 */
 
 GuitarTrainer.TargetController = Ember.Object.extend({
@@ -39,7 +32,6 @@ GuitarTrainer.TargetController = Ember.Object.extend({
 			return a.get("startTime") - b.get("startTime");
 		});
 		this.set("isSorted", true);
-		console.log(targets);
 	},
 
 	dispatch: function(){
@@ -57,6 +49,11 @@ GuitarTrainer.TargetController = Ember.Object.extend({
 		var targets = this.get("targets");
 		var scaledTime = timingController.get("scaledTime");
 		var i, len = targets.length;
+
+		if(!timingController.get("isPlaying")){
+			// scaledTime is being changed while not playing, so just reset firstIndex, and let it recalculate.
+			this.set("firstIndex", 0);
+		}
 		var firstIndex = this.get("firstIndex");
 
 		for(i=firstIndex; i<len; i++){
