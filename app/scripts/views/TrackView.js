@@ -1,11 +1,13 @@
-GuitarTrainer.TrackView = Ember.Object.extend({
-	world: null,
-	threeNode: null,
-	targets: null,
+/*
+	View for the track behind the fretboard.
+
+	TODO: This view has some dependent properties on the FretboardView, and should
+	have some sort of bindings set up.
+*/
+
+GuitarTrainer.TrackView = GuitarTrainer.ThreeView.extend({
 	fretboardView: null,
 	length: 100,
-	delay: 5000, // Time (ms) it will take from the moment the note appears until it's time to hit it.
-	time: 0, // Used to evaluate when to create targets
 	mesh: null,
 
 	init: function(){
