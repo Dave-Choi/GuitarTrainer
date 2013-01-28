@@ -56,7 +56,6 @@ GuitarTrainer.TimingController = Ember.Object.extend({
 		if(this.get("isPlaying")){
 			return;
 		}
-//		var time = this.get("time");
 		this.set("timeStart", Date.now());
 		this.set("isPlaying", true);
 		console.log("play");
@@ -72,7 +71,6 @@ GuitarTrainer.TimingController = Ember.Object.extend({
 			var now = Date.now();
 			this.set("time", this.get("time") + (now - this.get("timeStart")));
 			this.set("timeStart", now);
-
 		}
 	},
 
