@@ -28,6 +28,12 @@ GuitarTrainer.Target = Ember.Object.extend({
 			state it needs to to accomplish this (e.g. maintain a series of frequency flags for a
 			bend or slide)
 		*/
+	},
+
+	offsetCopy: function(offsetInMilliseconds){
+		var copy = GuitarTrainer.Target.create(Ember.copy(this)); // There might be a better way to do this.
+		copy.set("displayTime", copy.get("displayTime") + offsetInMilliseconds);
+		return copy;
 	}
 });
 
