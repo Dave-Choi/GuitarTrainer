@@ -1,5 +1,7 @@
 /*
 	World class handles scene creation, and basic camera interface.
+
+	TODO: Probably want to change this into just WorldView, and move camera stuff into a controller class.
 */
 GuitarTrainer.World = Ember.Object.extend({
 	scene: null,
