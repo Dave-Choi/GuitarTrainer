@@ -72,6 +72,10 @@ GuitarTrainer.Instrument = Ember.Object.extend({
 			var string = strings[i];
 			string.print();
 		}
+	},
+
+	noteAtCoordinates: function(stringIndex, fretIndex){
+		return this.get("strings")[stringIndex].get("notes")[fretIndex];
 	}
 });
 
