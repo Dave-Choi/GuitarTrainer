@@ -119,8 +119,8 @@ GuitarTrainer.World = Ember.Object.extend({
 		composer.render();
 	},
 
-	add: function(obj){
-		this.get("scene").add(obj);
+	add: function(node){
+		this.get("scene").add(node);
 	},
 
 	tweenPosTo: function(obj, target, time, easing){
