@@ -1,6 +1,5 @@
-GuitarTrainer.FrequencyTargetView = Ember.Object.extend({
+GuitarTrainer.FrequencyTargetView = GuitarTrainer.ThreeView.extend({
 	target: null,
-	threeNode: null,
 	position: null,
 	dimensions: null, // These are container dimensions.  The view doesn't have to be this big.
 	color: 0xffffff,
