@@ -1,4 +1,5 @@
 GuitarTrainer.ThreeView = Ember.Object.extend({
+	model: null,
 	threeNode: null,
 
 	init: function(){
