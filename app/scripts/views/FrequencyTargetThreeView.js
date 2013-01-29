@@ -1,4 +1,4 @@
-GuitarTrainer.FrequencyTargetThreeView = GuitarTrainer.ThreeView.extend({
+GuitarTrainer.FrequencyTargetView = GuitarTrainer.ThreeView.extend({
 	model: null,
 	position: null,
 	dimensions: null, // These are container dimensions.  The view doesn't have to be this big.
