@@ -6,9 +6,9 @@ GuitarTrainer.FrequencyTargetView = GuitarTrainer.ThreeView.extend({
 
 	init: function(){
 		this._super();
-		var position = this.get("position");
-		var dimensions = this.get("dimensions");
 		var target = this.get("model");
+		var position = this.get("position") || {x: 0, y: 0, z: 0};
+		var dimensions = this.get("dimensions") || {x: 0, y: 0, z: 0};
 		var color = this.get("color");
 		var node = new THREE.Object3D();
 		node.position = position;
