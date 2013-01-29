@@ -1,14 +1,14 @@
 GuitarTrainer.FrequencyTargetView = GuitarTrainer.ThreeView.extend({
-	target: null,
+	model: null,
 	position: null,
 	dimensions: null, // These are container dimensions.  The view doesn't have to be this big.
 	color: 0xffffff,
 
 	init: function(){
 		this._super();
-		var target = this.get("target");
 		var position = this.get("position");
 		var dimensions = this.get("dimensions");
+		var target = this.get("model");
 		var color = this.get("color");
 		var node = new THREE.Object3D();
 		node.position = position;
@@ -31,7 +31,7 @@ GuitarTrainer.FrequencyTargetView = GuitarTrainer.ThreeView.extend({
 	},
 
 	targetHit: function(){
-		var target = this.get("target");
+		var target = this.get("model");
 		if(target.get("hasBeenHit")){
 			var children = this.get("threeNode").children;
 			var i, len = children.length;
@@ -41,5 +41,5 @@ GuitarTrainer.FrequencyTargetView = GuitarTrainer.ThreeView.extend({
 				child.material.opacity = 0.1;
 			}
 		}
-	}.observes("target.hasBeenHit")
+	}.observes("model.hasBeenHit")
 });
