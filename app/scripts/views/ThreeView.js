@@ -8,6 +8,7 @@ GuitarTrainer.ThreeView = Ember.Object.extend({
 	},
 
 	add: function(node){
+		console.log(node);
 		this.threeNode.add(node);
 	}
 });
