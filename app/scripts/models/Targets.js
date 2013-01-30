@@ -79,5 +79,3 @@ GuitarTrainer.FrequencyTarget = GuitarTrainer.Target.extend({
 		return result;
 	}
 });
-
-GuitarTrainer.FrequencyTarget.reopen(GuitarTrainer.Renderable("FrequencyTarget"));

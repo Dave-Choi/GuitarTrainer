@@ -1,4 +1,4 @@
-GuitarTrainer.FrequencyTargetThreeView = GuitarTrainer.ThreeView.extend({
+GuitarTrainer.FrequencyTargetView = GuitarTrainer.ThreeView.extend({
 	model: null,
 	position: null,
 	dimensions: null, // These are container dimensions.  The view doesn't have to be this big.
@@ -8,7 +8,7 @@ GuitarTrainer.FrequencyTargetThreeView = GuitarTrainer.ThreeView.extend({
 		this._super();
 		var target = this.get("model");
 		var position = this.get("position") || {x: 0, y: 0, z: 0};
-		var dimensions = this.get("dimensions") || {x: 1, y: 1, z: 1};
+		var dimensions = this.get("dimensions") || {x: 0, y: 0, z: 0};
 		var color = this.get("color");
 		var node = new THREE.Object3D();
 		node.position = position;
