@@ -1,5 +1,3 @@
-
-
 var GuitarTrainer = Ember.Application.create();
 
 GuitarTrainer.ready = function(){
@@ -34,12 +32,21 @@ GuitarTrainer.ready = function(){
 
 	var world = GuitarTrainer.World.create();
 
-	var fretboard = GuitarTrainer.HeatmapFretboardView.create({world: world, instrument: GuitarTrainer.Guitar, pitchDetectionNode: pitchDetectionNode, flipped: true});
+	var fretboard = GuitarTrainer.HeatmapFretboardView.create({
+		world: world,
+		instrument: GuitarTrainer.Guitar,
+		pitchDetectionNode: pitchDetectionNode,
+		flipped: true
+	});
 	//var fretboard = GuitarTrainer.FretboardView.create({world: world, instrument: GuitarTrainer.Guitar, pitchDetectionNode: pitchDetectionNode});
 
 	world.get("shiftingNode").add(fretboard.get("threeNode"));
 	var noteCount = 0;
-	var track = GuitarTrainer.TrackView.create({world: world, instrument: GuitarTrainer.Guitar, fretboardView: fretboard});
+	var track = GuitarTrainer.TrackView.create({
+		world: world,
+		instrument: GuitarTrainer.Guitar,
+		fretboardView: fretboard
+	});
 	world.get("shiftingNode").add(track.get("threeNode"));
 
 	var timingController = GuitarTrainer.TimingController.create({
