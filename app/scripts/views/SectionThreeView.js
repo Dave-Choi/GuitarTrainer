@@ -5,8 +5,6 @@ GuitarTrainer.SectionThreeView = GuitarTrainer.ThreeView.extend({
 		var targets = section.get("targets");
 		var len = targets.length;
 
-		console.log(this.add);
-
 		for(var i=0; i<len; i++){
 			var target = targets[i];
 			var targetThreeView = target.createView("ThreeView");
