@@ -45,9 +45,9 @@ GuitarTrainer.Section = GuitarTrainer.Target.extend({
 			A target's duration could hypothetically go on forever, so all we can
 			really do is linear scan for the highest one.
 		*/
-		var targts = this.get("targets");
+		var targets = this.get("targets");
 		var latestStopTime = 0;
-		for(var i=len-1; i>=0; i--){
+		for(var i=targets.length-1; i>=0; i--){
 			var targetStopTime = targets[i].get("stopTime");
 			if(targetStopTime > latestStopTime){
 				latestStopTime = targetStopTime;
