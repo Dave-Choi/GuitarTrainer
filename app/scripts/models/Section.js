@@ -12,7 +12,6 @@
 */
 
 GuitarTrainer.Section = GuitarTrainer.Target.extend({
-	timingController: null,
 	pitchDetectionNode: null,
 	targets: null,
 
