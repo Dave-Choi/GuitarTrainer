@@ -32,7 +32,7 @@ GuitarTrainer.ready = function(){
 
 	var world = GuitarTrainer.World.create();
 
-	var fretboard = GuitarTrainer.HeatmapFretboardView.create({
+	GuitarTrainer.Fretboard = GuitarTrainer.HeatmapFretboardView.create({
 		world: world,
 		instrument: GuitarTrainer.Guitar,
 		pitchDetectionNode: pitchDetectionNode,
@@ -40,30 +40,30 @@ GuitarTrainer.ready = function(){
 	});
 	//var fretboard = GuitarTrainer.FretboardView.create({world: world, instrument: GuitarTrainer.Guitar, pitchDetectionNode: pitchDetectionNode});
 
-	world.get("shiftingNode").add(fretboard.get("threeNode"));
+	world.get("shiftingNode").add(GuitarTrainer.Fretboard.get("threeNode"));
 	var noteCount = 0;
 	var track = GuitarTrainer.TrackView.create({
 		world: world,
 		instrument: GuitarTrainer.Guitar,
-		fretboardView: fretboard
+		fretboardView: GuitarTrainer.Fretboard
 	});
 	world.get("shiftingNode").add(track.get("threeNode"));
 
-	var timingController = GuitarTrainer.TimingController.create({
+	GuitarTrainer.Timer = GuitarTrainer.TimingController.create({
 		world: world,
 		timeScale: 1.5,
 		distanceScale: 30
 	});
 
 	var targetController = GuitarTrainer.TargetController.create({
-		timingController: timingController,
+		timingController: GuitarTrainer.Timer,
 		pitchDetectionNode: pitchDetectionNode
 	});
 
 	var targetFactory = GuitarTrainer.TargetFactory.create({
 		world: world,
-		timingController: timingController,
-		fretboardView: fretboard
+		timingController: GuitarTrainer.Timer,
+		fretboardView: GuitarTrainer.Fretboard
 	});
 
 	function spawnFreqTargetForCoordinates(instrument, stringIndex, fretIndex){
@@ -107,13 +107,13 @@ GuitarTrainer.ready = function(){
 			world.panRight();
 		}
 		if(e.keyCode == 83){ // S
-			timingController.stop();
+			GuitarTrainer.Timer.stop();
 		}
 		if(e.keyCode == 87){ // W
-			timingController.play();
+			GuitarTrainer.Timer.play();
 		}
 		if(e.keyCode == 81){ // Q
-			timingController.goToTime(0);
+			GuitarTrainer.Timer.goToTime(0);
 		}
 		if(e.keyCode == 69){ // E
 
