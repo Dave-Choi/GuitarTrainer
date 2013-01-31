@@ -94,9 +94,11 @@ GuitarTrainer.Section = GuitarTrainer.Target.extend({
 		var offsetTargets = targets.map(function(oldTarget){
 			return oldTarget.offsetCopy(offsetInMilliseconds);
 		});
-		var newSection = GuitarTrainer.Section.create({
-			targets: offsetTargets
-		});
+		
+		var proto = Ember.copy(this);
+		var newSection = this.constructor.create(proto);
+		newSection.set("targets", offsetTargets);
+
 		return newSection;
 	},
 
