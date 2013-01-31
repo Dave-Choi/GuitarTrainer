@@ -10,6 +10,10 @@ GuitarTrainer.Target = Ember.Object.extend({
 	duration: 250,	// The length of time the player has after startTime to hit the target (in ms)
 	hasBeenHit: false,
 
+	init: function(){
+		this.set("timingController", this.get("timingController") || GuitarTrainer.Timer);
+	},
+
 	startTime: function(){
 		return this.get("displayTime") - this.get("leadTime");
 	}.property("displayTime", "leadTime"),
