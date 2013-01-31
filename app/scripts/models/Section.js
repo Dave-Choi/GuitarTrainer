@@ -57,8 +57,11 @@ GuitarTrainer.Section = GuitarTrainer.Target.extend({
 	}.property("targets.@each.stopTIme"),
 
 	init: function(){
+		this.set("targets", this.get("targets") || []); /*
+			I don't know why, but putting this line after the call to _super() was
+			making the sorting function break, saying that targets was undefined.
+		*/
 		this._super();
-		this.set("targets", this.get("targets") || []);
 	},
 
 	addTarget: function(target){
