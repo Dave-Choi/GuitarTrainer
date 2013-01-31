@@ -42,7 +42,19 @@ GuitarTrainer.Target = Ember.Object.extend({
 });
 
 GuitarTrainer.FrequencyTarget = GuitarTrainer.Target.extend({
-	frequency: 0,
+	instrument: null,
+	stringIndex: 0,
+	fretIndex: 0,
+
+	frequency: function(){
+		var instrument = this.get("instrument");
+		var stringIndex = this.get("stringIndex");
+		var fretIndex = this.get("fretIndex");
+
+		var note = instrument.noteAtCoordinates(stringIndex, fretIndex);
+		return note.get("frequency");
+	}.property("instrument", "stringIndex", "fretIndex"),
+
 	threshold: 0.01, /*
 		I don't actually know what units these are in, but this is the minimum
 		value in the FFT bin that will register as a hit.
