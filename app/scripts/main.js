@@ -67,7 +67,7 @@ GuitarTrainer.ready = function(){
 	});
 
 	function spawnFreqTargetForCoordinates(instrument, stringIndex, fretIndex){
-		var note = instrument.get("strings")[stringIndex].get("notes")[fretIndex];
+		var note = instrument.noteAtCoordinates(stringIndex, fretIndex);
 		var time = noteCount++ * 1000; // in ms
 		var target = GuitarTrainer.FrequencyTarget.create({
 			frequency: note.get("frequency"),
@@ -120,9 +120,10 @@ GuitarTrainer.ready = function(){
 		}
 	});
 
+	var targets = [];
 	var lastIndex = 0;
 	var isScalingUp = true;
-	for(var i=0; i<99; i++){ // Scale up and down
+	for(var i=0; i<30; i++){ // Scale up and down
 		if(lastIndex == AMajorScaleCoordinates.length - 1 && isScalingUp){
 			isScalingUp = false;
 		}
@@ -130,7 +131,19 @@ GuitarTrainer.ready = function(){
 			isScalingUp = true;
 		}
 		var coordinates = AMajorScaleCoordinates[lastIndex];
-		spawnFreqTargetForCoordinates(GuitarTrainer.Guitar, coordinates[0], coordinates[1]);
+		var stringIndex = coordinates[0];
+		var fretIndex = coordinates[1];
+		var time = i * 1000;
+
+		var target = GuitarTrainer.FrequencyTarget.create({
+			instrument: GuitarTrainer.Guitar,
+			stringIndex: stringIndex,
+			fretIndex: fretIndex,
+
+			displayTime: time
+		});
+		targets.push(target);
+		
 		if(isScalingUp){
 			lastIndex++;
 		}
@@ -138,4 +151,24 @@ GuitarTrainer.ready = function(){
 			lastIndex--;
 		}
 	}
+
+	var scaleUpDownSection = GuitarTrainer.Section.create({
+		pitchDetectionNode: pitchDetectionNode,
+		targets: targets
+	});
+
+	var masterSection = GuitarTrainer.Section.create({
+		pitchDetectionNode: pitchDetectionNode,
+	});
+
+	var sectionCopy1 = scaleUpDownSection.offsetCopy(2000);
+	console.log(scaleUpDownSection);
+	console.log(sectionCopy1);
+	var sectionCopy2 = scaleUpDownSection.offsetCopy(5000);
+	//var sectionView = scaleUpDownSection.createView("ThreeView");
+	masterSection.addTarget(sectionCopy1);
+	masterSection.addTarget(sectionCopy2);
+
+	var sectionView = masterSection.createView("ThreeView");
+	world.add(sectionView.get("threeNode"));
 };
