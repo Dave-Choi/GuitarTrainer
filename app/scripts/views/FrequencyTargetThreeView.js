@@ -1,15 +1,47 @@
 GuitarTrainer.FrequencyTargetThreeView = GuitarTrainer.ThreeView.extend({
 	model: null,
-	position: null,
-	dimensions: null, // These are container dimensions.  The view doesn't have to be this big.
-	color: 0xffffff,
+
+	position: function(){
+		var fretboardView = GuitarTrainer.Fretboard;
+		var target = this.get("model");
+		var stringIndex = target.get("stringIndex");
+		var fretIndex = target.get("fretIndex");
+
+		var pos = fretboardView.posForCoordinates(stringIndex, fretIndex);
+		pos.z = - target.get("displayTime") / 1000 * GuitarTrainer.Timer.get("distanceScale");
+		return pos;
+	}.property(),
+
+	dimensions: function(){
+		var fretboardView = GuitarTrainer.Fretboard;
+		var target = this.get("model");
+		var fretIndex = target.get("fretIndex");
+
+		var stringSpacing = fretboardView.get("stringSpacing");
+		var fretWidth = fretboardView.fretWidth(fretIndex);
+
+		return {
+			x: fretWidth,
+			y: stringSpacing,
+			z: stringSpacing
+		};
+	}.property(),
+
+	color: function(){
+		var fretboardView = GuitarTrainer.Fretboard;
+		var stringIndex = this.get("model").get("stringIndex");
+
+		return fretboardView.get("stringColors")[stringIndex];
+	}.property(),
 
 	init: function(){
 		this._super();
 		var target = this.get("model");
-		var position = this.get("position") || {x: 0, y: 0, z: 0};
-		var dimensions = this.get("dimensions") || {x: 1, y: 1, z: 1};
+
+		var position = this.get("position");
+		var dimensions = this.get("dimensions");
 		var color = this.get("color");
+
 		var node = new THREE.Object3D();
 		node.position = position;
 		var box = GuitarTrainer.ShapeFactory.cube({
