@@ -60,11 +60,6 @@ GuitarTrainer.ready = function(){
 		pitchDetectionNode: pitchDetectionNode
 	});
 
-	var targetFactory = GuitarTrainer.TargetFactory.create({
-		world: world,
-		timingController: GuitarTrainer.Timer,
-		fretboardView: GuitarTrainer.Fretboard
-	});
 
 	function spawnFreqTargetForCoordinates(instrument, stringIndex, fretIndex){
 		var note = instrument.noteAtCoordinates(stringIndex, fretIndex);
