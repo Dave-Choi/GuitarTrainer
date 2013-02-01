@@ -153,14 +153,11 @@ GuitarTrainer.ready = function(){
 	});
 
 	var masterSection = GuitarTrainer.Section.create({
-		pitchDetectionNode: pitchDetectionNode,
+		pitchDetectionNode: pitchDetectionNode
 	});
 
 	var sectionCopy1 = scaleUpDownSection.offsetCopy(2000);
-	console.log(scaleUpDownSection);
-	console.log(sectionCopy1);
 	var sectionCopy2 = scaleUpDownSection.offsetCopy(5000);
-	//var sectionView = scaleUpDownSection.createView("ThreeView");
 	masterSection.addTarget(sectionCopy1);
 	masterSection.addTarget(sectionCopy2);
 
