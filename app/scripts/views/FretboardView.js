@@ -14,6 +14,19 @@ GuitarTrainer.FretboardView = Ember.Object.extend({
 
 	// These colors and orientation reflect the Rocksmith string coloring
 	stringColors: [0xff0000, 0xffff00, 0x0000ff, 0xff8800, 0x00ff00, 0xff00ff],
+	stringColorsHex: function(){
+		var stringColors = this.get("stringColors");
+		var hexColors = [];
+		var len = stringColors.length;
+		for(var i=0; i<len; i++){
+			var color = stringColors[i];
+			var unpaddedHexString = color.toString(16);
+			var paddedHexString = ("000000" + unpaddedHexString).slice(-6);
+			hexColors.push(paddedHexString);
+		}
+		return hexColors;
+	}.property("stringColors.@each"),
+
 	flipped: true,  // If flipped is true, the red (low E) string is shown on top, mirroring a right handed guitar
 
 	// Can be configured to use different string views,
