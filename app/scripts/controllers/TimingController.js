@@ -22,6 +22,7 @@ GuitarTrainer.TimingController = Ember.Object.extend({
 	timeScale: 1, // How quickly time should pass, where 1 is real time, and 2 is twice real time
 
 	distanceScale: 15, // How much distance corresponds to one second of real time
+	distanceScale2D: 50, // How much 2D canvas distance corresponds to one second of real time (used for tablature)
 
 	timeStart: 0,
 	isPlaying: false,
