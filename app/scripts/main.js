@@ -25,10 +25,11 @@ GuitarTrainer.ready = function(){
 	canvas.height = 100;
 	document.getElementById("mainThing").appendChild(canvas);
 
-	var pitchDetectionNode = GuitarTrainer.VisualPitchDetectionNode.create({canvas: canvas});
+	var pitchDetectionNode = GuitarTrainer.VisualPitchDetectionNode.create({
+		canvas: canvas
+	});
 
 	connectMic();
-
 
 	var world = GuitarTrainer.World.create();
 
@@ -38,6 +39,7 @@ GuitarTrainer.ready = function(){
 		pitchDetectionNode: pitchDetectionNode,
 		flipped: true
 	});
+
 	//var fretboard = GuitarTrainer.FretboardView.create({world: world, instrument: GuitarTrainer.Guitar, pitchDetectionNode: pitchDetectionNode});
 
 	world.get("shiftingNode").add(GuitarTrainer.Fretboard.get("threeNode"));
@@ -96,12 +98,6 @@ GuitarTrainer.ready = function(){
 		var coordinates = AMajorScaleCoordinates[Math.floor(Math.random() * AMajorScaleCoordinates.length)];
 		spawnFreqTargetForCoordinates(GuitarTrainer.Guitar, coordinates[0], coordinates[1]);
 	}
-
-	function render(){
-		world.render();
-		requestAnimationFrame(render);
-	}
-	requestAnimationFrame(render);
 
 	$(document).keydown(function(e){
 		if(e.keyCode == 65){ // A
@@ -172,4 +168,33 @@ GuitarTrainer.ready = function(){
 
 	var sectionView = masterSection.createView("ThreeView");
 	world.add(sectionView.get("threeNode"));
+
+	var tablatureViewCanvas = document.createElement("canvas");
+	tablatureViewCanvas.id = "tablatureViewCanvas";
+	tablatureViewCanvas.width = 1250;
+	tablatureViewCanvas.height = 100;
+	document.getElementById("tablatureView").appendChild(tablatureViewCanvas);
+
+	GuitarTrainer.Tablature = GuitarTrainer.CanvasRenderer.create({
+		canvas: tablatureViewCanvas
+	});
+
+	GuitarTrainer.TablatureStaff = GuitarTrainer.TablatureStaffView.create({
+		canvas: tablatureViewCanvas,
+		instrument: GuitarTrainer.Guitar
+	});
+	GuitarTrainer.Tablature.addView(GuitarTrainer.TablatureStaff);
+
+
+	var sectionTabView = masterSection.createView("TablatureView", {
+		canvas: tablatureViewCanvas
+	});
+	GuitarTrainer.Tablature.addView(sectionTabView);
+
+	function render(){
+		world.render();
+		GuitarTrainer.Tablature.render();
+		requestAnimationFrame(render);
+	}
+	requestAnimationFrame(render);
 };
