@@ -35,7 +35,7 @@ GuitarTrainer.Target = Ember.Object.extend({
 	},
 
 	offsetCopy: function(offsetInMilliseconds){
-		var copy = this.constructor.create(Ember.copy(this)); // There might be a better way to do this.
+		var copy = this.constructor.create(this); // There might be a better way to do this.
 		copy.set("displayTime", copy.get("displayTime") + offsetInMilliseconds);
 		return copy;
 	}
