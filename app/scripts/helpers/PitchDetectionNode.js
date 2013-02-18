@@ -405,11 +405,18 @@ GuitarTrainer.PitchDetectionNode = Ember.Object.extend({
 GuitarTrainer.VisualPitchDetectionNode = GuitarTrainer.PitchDetectionNode.extend({
 	canvas: null,
 	ctx: function(){
-		return this.canvas.getContext("2d");
+		var canvas = this.get("canvas");
+		if(!canvas){
+			return null;
+		}
+		return canvas.getContext("2d");
 	}.property("canvas"),
 
 	drawSpectrum: function(array){
 		var ctx = this.get("ctx");
+		if(!ctx){
+			return;
+		}
 		ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 		ctx.fillStyle = "black";
 
