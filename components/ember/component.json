@@ -1,6 +1,6 @@
 {
   "name": "ember",
-  "version": "1.0.0-pre.4",
+  "version": "1.0.0-rc.1",
   "main": [
     "./ember.js",
     "./ember.min.js"
@@ -9,8 +9,8 @@
     "jquery": "~1.9.0",
     "handlebars": "~1.0.0"
   },
-  "gitHead": "441b60f136dd18a9130232bfa1b35fec4377bae5",
-  "_id": "ember@1.0.0-pre.4",
+  "gitHead": "daa4be2212e47af0561c62527a8bd487840a1154",
+  "_id": "ember@1.0.0-rc.1",
   "readme": "ERROR: No README.md file found!",
   "description": "ERROR: No README.md file found!",
   "repository": {
