@@ -13,17 +13,6 @@
 
     </head>
     <body>
-    <div class="container" style="width: 100%;" id="mainThing">
-        
-    </div>
-
-    <div class="container" style="width: 100%;" id="tablatureView">
-        
-    </div>
-
-    <div id="exercise" style="width: 100%; height: 700px;">
-
-    </div>
         <!--[if lt IE 7]>
             <p class="chromeframe">You are using an outdated browser. <a href="http://browsehappy.com/">Upgrade your browser today</a> or <a href="http://www.google.com/chromeframe/?redirect=true">install Google Chrome Frame</a> to better experience this site.</p>
         <![endif]-->
@@ -36,6 +25,7 @@
         <script src="components/jquery/jquery.js"></script>
         <script src="components/handlebars/handlebars.js"></script>
         <script src="components/ember/ember.js"></script>
+        <script src="scripts/vendor/tempEmberData.js"></script>
 
         <script src="scripts/main.js"></script>
         <script src="scripts/routes/app-router.js"></script>
@@ -83,6 +73,11 @@
         <script src="scripts/views/TablatureStaffView.js"></script>
         <script src="scripts/views/FrequencyTargetTablatureView.js"></script>
         <script src="scripts/views/SectionTablatureView.js"></script>
+
+        <script src="scripts/models/Exercise.js"></script>
+        <script src="scripts/controllers/ExerciseController.js"></script>
+
+        <script src="scripts/views/ExercisePlayView.js"></script>
         <!-- endbuild -->
 
         <!-- Google Analytics: change UA-XXXXX-X to be your site's ID. -->
@@ -92,5 +87,71 @@
             g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
             s.parentNode.insertBefore(g,s)}(document,'script'));
         </script>
+
+        <script type="text/x-handlebars" data-template-name="exercises">
+            {{#if GuitarTrainer.microphone.isConnected}}
+                <section>
+                    Microphone connected.
+                </section>
+                {{outlet}}
+            {{else}}
+                <section>
+                    <p>Before playing any exercises, you'll need to enable access to your microphone.</p>
+                    <p>Signal fidelity requirements are pretty high, so direct connection to an electric guitar's output will work best.  An analog connection to your computer's line-in microphone jack works well, if you have a 1/4" to 3.5mm adapter, and if you have a USB connection, that might work, too.  I haven't had any luck with Rocksmith's cable and Chrome, unfortunately.</p>
+                </section>
+            {{/if}}
+        </script>
+
+        <script type="text/x-handlebars" data-template-name="exercises/index">
+
+            <h1>Select an Exercise</h1>
+            <ul>
+                {{#each exercise in controller}}
+                 <li>{{#linkTo "exercise" exercise}}{{exercise.title}}{{/linkTo}}</li>
+                {{/each}}
+            </ul>
+        </script>
+
+        <script type="text/x-handlebars" data-template-name="tablature">
+            <div class="container" style="width: 100%;" id="tablatureView">
+                <canvas id="tablatureViewCanvas" width="1250" height="100">
+                </canvas>
+            </div>
+        </script>
+
+        <script type="text/x-handlebars" data-template-name="exercise">
+            <section>
+                <header>
+                    {{title}}
+                </header>
+            </section>
+            {{outlet}}
+        </script>
+
+        <script type="text/x-handlebars" data-template-name="exercise/index">
+            <nav>
+                <ul>
+                    <li>{{#linkTo "exercise.play"}}Play{{/linkTo}}</li>
+                    <li>{{#linkTo "exercise.edit"}}Edit{{/linkTo}}</li>
+                </ul>
+            </nav>
+            {{outlet}}
+        </script>
+
+        <script type="text/x-handlebars" data-template-name="exercise/play">
+            <div class="container" style="width: 100%;" id="mainThing">
+            </div>
+
+            <div class="container" style="width: 100%;" id="tablatureView">
+            </div>
+
+            <div id="exercise" style="width: 100%; height: 700px; border: solid red 1px;">
+            </div>
+        </script>
+
+        <script type="text/x-handlebars" data-template-name="exercise/edit">
+            <section>Put exercise editing interface here.</section>
+        </script>
+
     </body>
 </html>
