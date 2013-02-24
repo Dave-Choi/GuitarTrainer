@@ -39,9 +39,10 @@ ConditionalGraph = Ember.Object.extend({
 
 /*
 	A Node contains an array of possible transitions to other nodes.
+
+	The node's actual contents can be specified on objects extended from this one.
 */
 ConditionalGraph.Node = Ember.Object.extend({
-	section: null,
 	transitions: null,
 
 	init: function(){
