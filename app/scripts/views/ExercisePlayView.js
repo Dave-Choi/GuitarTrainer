@@ -1,6 +1,7 @@
 GuitarTrainer.ExercisePlayView = Ember.View.extend({
+	animationRequestID: null,
+
 	didInsertElement: function(){
-		console.log("inserted ExercisePlayView");
 		this._super();
 
 		var canvas = document.createElement("canvas");
@@ -183,8 +184,14 @@ GuitarTrainer.ExercisePlayView = Ember.View.extend({
 		function render(){
 			world.render();
 			GuitarTrainer.Tablature.render();
-			requestAnimationFrame(render);
+			this.set("animationRequestID", requestAnimationFrame(render.bind(this)));
 		}
-		requestAnimationFrame(render);
+		this.set("animationRequestID", requestAnimationFrame(render.bind(this)));
+	},
+
+	willDestroyElement: function(){
+		var id = this.get("animationRequestID");
+		console.log(id);
+		cancelAnimationFrame(this.get("animationRequestID"));
 	}
 });
