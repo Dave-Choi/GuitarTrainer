@@ -183,7 +183,6 @@ GuitarTrainer.ExercisePlayView = Ember.View.extend({
 
 	willDestroyElement: function(){
 		var id = this.get("animationRequestID");
-		console.log(id);
 		cancelAnimationFrame(this.get("animationRequestID"));
 	}
 });
