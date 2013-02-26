@@ -96,51 +96,44 @@ GuitarTrainer.ExercisePlayView = Ember.View.extend({
 			}
 		});
 
-		var targets = [];
-		var lastIndex = 0;
-		var isScalingUp = true;
-		for(var i=0; i<30; i++){ // Scale up and down
-			if(lastIndex == AMajorScaleCoordinates.length - 1 && isScalingUp){
-				isScalingUp = false;
+		function evenTempoSection(coordinateList, intervalLength){
+			var targets = [];
+			var len = coordinateList.length;
+			for(var i=0; i<len; i++){
+				var coordinates = coordinateList[i];
+				var stringIndex = coordinates[0];
+				var fretIndex = coordinates[1];
+				time = i * intervalLength;
+				var target = GuitarTrainer.FrequencyTarget.create({
+					instrument: GuitarTrainer.Guitar,
+					stringIndex: stringIndex,
+					fretIndex: fretIndex,
+					displayTime: time
+				});
+				targets.push(target);
 			}
-			else if(lastIndex === 0 && !isScalingUp){
-				isScalingUp = true;
-			}
-			var coordinates = AMajorScaleCoordinates[lastIndex];
-			var stringIndex = coordinates[0];
-			var fretIndex = coordinates[1];
-			var time = i * 1000;
-
-			var target = GuitarTrainer.FrequencyTarget.create({
-				instrument: GuitarTrainer.Guitar,
-				stringIndex: stringIndex,
-				fretIndex: fretIndex,
-
-				displayTime: time
-			});
-			targets.push(target);
-			
-			if(isScalingUp){
-				lastIndex++;
-			}
-			else{
-				lastIndex--;
-			}
+			return targets;
 		}
 
-		var scaleUpDownSection = GuitarTrainer.Section.create({
+		var scaleUpTargets = evenTempoSection(AMajorScaleCoordinates, 1000);
+		var scaleDownTargets = evenTempoSection(AMajorScaleCoordinates.reverse(), 1000);
+
+		var scaleUpSection = GuitarTrainer.Section.create({
 			pitchDetectionNode: pitchDetectionNode,
-			targets: targets
+			targets: scaleUpTargets
+		});
+
+		var scaleDownSection = GuitarTrainer.Section.create({
+			pitchDetectionNode: pitchDetectionNode,
+			targets: scaleDownTargets
 		});
 
 		var masterSection = GuitarTrainer.Section.create({
 			pitchDetectionNode: pitchDetectionNode
 		});
 
-		var sectionCopy1 = scaleUpDownSection.offsetCopy(2000);
-		var sectionCopy2 = scaleUpDownSection.offsetCopy(5000);
-		masterSection.addTarget(sectionCopy1);
-		masterSection.addTarget(sectionCopy2);
+		masterSection.addTarget(scaleUpSection);
+		masterSection.addTarget(scaleDownSection.offsetCopy(scaleUpSection.get("targets").length * 1000));
 
 		var sectionView = masterSection.createView("ThreeView");
 		world.add(sectionView.get("threeNode"));
@@ -166,6 +159,20 @@ GuitarTrainer.ExercisePlayView = Ember.View.extend({
 			canvas: tablatureViewCanvas
 		});
 		GuitarTrainer.Tablature.addView(sectionTabView);
+
+
+		var graph = GuitarTrainer.ExerciseGraph.create();
+		var scaleUpNode = GuitarTrainer.ExerciseNode.create({
+			section: scaleUpSection
+		});
+		var scaleDownNode = GuitarTrainer.ExerciseNode.create({
+			section: scaleDownSection
+		});
+
+		scaleUpNode.addNewTransition(scaleDownNode);
+		graph.addNode(scaleUpNode);
+		scaleDownNode.addNewTransition(scaleUpNode);
+		graph.addNode(scaleDownNode);
 
 		function render(){
 			world.render();
