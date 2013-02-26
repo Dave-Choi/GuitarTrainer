@@ -33,6 +33,15 @@ ConditionalGraph = Ember.Object.extend({
 	nextNode: function(){
 		var currentNode = this.get("currentNode");
 		return currentNode.nextNode();
+	},
+
+	advance: function(){
+		// Go to the next node
+		var next = this.nextNode();
+		this.set("currentNode", next);
+
+		// Return the new position.
+		return next;
 	}
 });
 
