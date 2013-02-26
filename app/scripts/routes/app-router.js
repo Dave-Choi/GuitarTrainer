@@ -21,6 +21,9 @@ GuitarTrainer.ExerciseIndexController = Ember.Controller.extend({
 	needs: "exercise"
 });
 
-GuitarTrainer.ExercisePlayController = Ember.Controller.extend({
-	needs: "exercise"
+GuitarTrainer.ExercisePlayRoute = Ember.Route.extend({
+	setupController: function(controller){
+		// This buys me access to the model's properties via their name only in the template.
+		controller.set("content", this.modelFor("exercise"));
+	}
 });
