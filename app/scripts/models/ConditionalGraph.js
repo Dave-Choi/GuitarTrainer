@@ -50,6 +50,11 @@ ConditionalGraph.Node = Ember.Object.extend({
 	},
 
 	addNewTransition: function(node, condition){
+		if(!condition){
+			condition = function(){
+				return true;
+			};
+		}
 		var transition = ConditionalGraph.Transition.create({
 			sourceNode: this,
 			targetNode: node,
