@@ -12,3 +12,12 @@
 GuitarTrainer.ExerciseGraph = ConditionalGraph.extend({
 
 });
+
+
+GuitarTrainer.ExerciseNode = ConditionalGraph.Node.extend({
+	section: null
+});
+
+GuitarTrainer.ExerciseTransition = ConditionalGraph.Transition.extend({
+
+});
