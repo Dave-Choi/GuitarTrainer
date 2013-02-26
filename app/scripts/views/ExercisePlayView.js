@@ -171,7 +171,6 @@ GuitarTrainer.ExercisePlayView = Ember.View.extend({
 
 		scaleUpNode.addNewTransition(scaleDownNode);
 		graph.addNode(scaleUpNode);
-		scaleDownNode.addNewTransition(scaleUpNode);
 		graph.addNode(scaleDownNode);
 
 		function render(){
