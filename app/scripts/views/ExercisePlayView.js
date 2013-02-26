@@ -75,20 +75,6 @@ GuitarTrainer.ExercisePlayView = Ember.View.extend({
 			[5, 4],	[5, 5]
 		];
 
-		var AM7ArpeggioCoordinates = [
-					[0, 5],
-			[1, 4],					[1, 7],
-							[2, 6], [2, 7],
-							[3, 6],
-					[4, 5],
-			[5, 4],	[5, 5]
-		];
-
-		function spawnRandomMajorScaleTarget(){
-			var coordinates = AMajorScaleCoordinates[Math.floor(Math.random() * AMajorScaleCoordinates.length)];
-			spawnFreqTargetForCoordinates(GuitarTrainer.Guitar, coordinates[0], coordinates[1]);
-		}
-
 		$(document).keydown(function(e){
 			if(e.keyCode == 65){ // A
 				world.panLeft();
