@@ -161,17 +161,17 @@ GuitarTrainer.ExercisePlayView = Ember.View.extend({
 		GuitarTrainer.Tablature.addView(sectionTabView);
 
 
-		var graph = GuitarTrainer.ExerciseGraph.create();
-		var scaleUpNode = GuitarTrainer.ExerciseNode.create({
-			section: scaleUpSection
-		});
-		var scaleDownNode = GuitarTrainer.ExerciseNode.create({
-			section: scaleDownSection
-		});
+		// var graph = GuitarTrainer.ExerciseGraph.create();
+		// var scaleUpNode = GuitarTrainer.ExerciseNode.create({
+		// 	section: scaleUpSection
+		// });
+		// var scaleDownNode = GuitarTrainer.ExerciseNode.create({
+		// 	section: scaleDownSection
+		// });
 
-		scaleUpNode.addNewTransition(scaleDownNode);
-		graph.addNode(scaleUpNode);
-		graph.addNode(scaleDownNode);
+		// scaleUpNode.addNewTransition(scaleDownNode);
+		// graph.addNode(scaleUpNode);
+		// graph.addNode(scaleDownNode);
 
 		function render(){
 			world.render();
