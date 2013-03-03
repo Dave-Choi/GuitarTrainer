@@ -130,6 +130,9 @@
                 <header>
                     <h2>{{title}}</h2>
                     <p>{{description}}</p>
+                        {{#with instrument}}
+                            {{name}} ({{partial "instrumentTuning"}})
+                        {{/with}}
                 </header>
                 Graph preview here.
             </section>
@@ -146,6 +149,8 @@
             {{outlet}}
         </script>
 
+
+
         <script type="text/x-handlebars" data-template-name="exercise/play">
             <div class="container" style="width: 100%;" id="mainThing">
             </div>
@@ -159,6 +164,31 @@
 
         <script type="text/x-handlebars" data-template-name="exercise/edit">
             <section>Put exercise editing interface here.</section>
+        </script>
+
+        <script type="text/x-handlebars" data-template-name="instruments/index">
+            <h1>Select an Instrument</h1>
+            <ul>
+                {{#each instrument in controller}}
+                 <li>{{#linkTo "instrument" instrument}}{{instrument.name}}{{/linkTo}}</li>
+                {{/each}}
+            </ul>
+        </script>
+
+        <script type="text/x-handlebars" data-template-name="_instrumentTuning">
+            {{#each note in tuning.notes}}
+                {{note.name}}{{note.octave}}
+            {{/each}}
+        </script>
+
+        <script type="text/x-handlebars" data-template-name="instrument">
+            <section>
+                <header>
+                    <h2>{{name}}</h2>
+                </header>
+                {{partial "instrumentTuning"}}
+            </section>
+            {{outlet}}
         </script>
 
     </body>
