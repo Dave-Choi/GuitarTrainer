@@ -1,6 +1,6 @@
 GuitarTrainer.Router.map(function(){
 	this.resource("exercises", { path: "/" }, function(){
-		this.resource("exercise", { path: "/:exercise_id"}, function(){
+		this.resource("exercise", { path: "/:exercise_id" }, function(){
 			this.route("create");
 			this.route("edit");
 			this.route("play");
