@@ -7,6 +7,12 @@ GuitarTrainer.Router.map(function(){
 			this.route("listen");
 		});
 	});
+	this.resource("instruments", { path: "/instruments" }, function(){
+		this.resource("instrument", { path: "/:instrument_id" }, function(){
+			this.route("create");
+			this.route("edit");
+		});
+	});
 });
 
 GuitarTrainer.ExercisesIndexController = Ember.ArrayController.extend();
@@ -21,5 +27,11 @@ GuitarTrainer.ExercisePlayRoute = Ember.Route.extend({
 	setupController: function(controller){
 		// This buys me access to the model's properties via their name only in the template.
 		controller.set("content", this.modelFor("exercise"));
+	}
+});
+
+GuitarTrainer.InstrumentsIndexRoute = Ember.Route.extend({
+	model: function(){
+		return GuitarTrainer.Instrument.find();
 	}
 });
