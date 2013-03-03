@@ -4,10 +4,10 @@ GuitarTrainer.StoreAdapter = DS.FixtureAdapter;
 
 GuitarTrainer.StoreAdapter.registerTransform("object", {
 	deserialize: function(serialized){
-		return Ember.none(serialized) ? {} : serialized;
+		return Ember.isNone(serialized) ? {} : serialized;
 	},
 	serialize: function(deserialized){
-		return Ember.none(deserialized) ? {} : deserialized;
+		return Ember.isNone(deserialized) ? {} : deserialized;
 	}
 });
 
