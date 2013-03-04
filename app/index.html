@@ -176,8 +176,8 @@
         </script>
 
         <script type="text/x-handlebars" data-template-name="_instrumentTuning">
-            {{#each note in tuning.notes}}
-                {{note.name}}{{note.octave}}
+            {{#each string in tuning.strings}}
+                {{string.root.name}}{{string.root.octave}}
             {{/each}}
         </script>
 

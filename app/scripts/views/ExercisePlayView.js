@@ -1,8 +1,16 @@
 GuitarTrainer.ExercisePlayView = Ember.View.extend({
 	animationRequestID: null,
 
+	init: function(){
+		this._super();
+	},
+
 	didInsertElement: function(){
 		this._super();
+
+		// console.log(this.get("controller.instrument.tuning.notes")[1].name);  // This access chain works.
+
+		var instrument = this.get("controller").controllerFor("instrument.play"); // This is almost certainly terrible.
 
 		var canvas = this.$("#spectrogram")[0];
 
@@ -21,18 +29,18 @@ GuitarTrainer.ExercisePlayView = Ember.View.extend({
 
 		GuitarTrainer.Fretboard = GuitarTrainer.HeatmapFretboardView.create({
 			world: world,
-			instrument: GuitarTrainer.Guitar,
+			instrument: instrument,
 			pitchDetectionNode: pitchDetectionNode,
 			flipped: true
 		});
 
-		//var fretboard = GuitarTrainer.FretboardView.create({world: world, instrument: GuitarTrainer.Guitar, pitchDetectionNode: pitchDetectionNode});
+		//var fretboard = GuitarTrainer.FretboardView.create({world: world, instrument: instrument, pitchDetectionNode: pitchDetectionNode});
 
 		world.get("shiftingNode").add(GuitarTrainer.Fretboard.get("threeNode"));
 		var noteCount = 0;
 		var track = GuitarTrainer.TrackView.create({
 			world: world,
-			instrument: GuitarTrainer.Guitar,
+			instrument: instrument,
 			fretboardView: GuitarTrainer.Fretboard
 		});
 		world.get("shiftingNode").add(track.get("threeNode"));
@@ -101,7 +109,7 @@ GuitarTrainer.ExercisePlayView = Ember.View.extend({
 				var fretIndex = coordinates[1];
 				time = i * intervalLength;
 				var target = GuitarTrainer.FrequencyTarget.create({
-					instrument: GuitarTrainer.Guitar,
+					instrument: instrument,
 					stringIndex: stringIndex,
 					fretIndex: fretIndex,
 					displayTime: time
@@ -146,7 +154,7 @@ GuitarTrainer.ExercisePlayView = Ember.View.extend({
 
 		GuitarTrainer.TablatureStaff = GuitarTrainer.TablatureStaffView.create({
 			canvas: tablatureViewCanvas,
-			instrument: GuitarTrainer.Guitar
+			instrument: instrument
 		});
 		GuitarTrainer.Tablature.addView(GuitarTrainer.TablatureStaff);
 
