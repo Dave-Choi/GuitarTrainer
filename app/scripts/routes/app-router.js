@@ -1,5 +1,5 @@
 GuitarTrainer.Router.map(function(){
-	this.resource("exercises", { path: "/" }, function(){
+	this.resource("exercises", function(){
 		this.resource("exercise", { path: "/:exercise_id" }, function(){
 			this.route("create");
 			this.route("edit");
@@ -13,6 +13,12 @@ GuitarTrainer.Router.map(function(){
 			this.route("edit");
 		});
 	});
+});
+
+GuitarTrainer.IndexRoute = Ember.Route.extend({
+	redirect: function(){
+		this.transitionTo("exercises");
+	}
 });
 
 GuitarTrainer.ExercisesIndexController = Ember.ArrayController.extend();
