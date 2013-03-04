@@ -7,7 +7,7 @@ GuitarTrainer.Router.map(function(){
 			this.route("listen");
 		});
 	});
-	this.resource("instruments", { path: "/instruments" }, function(){
+	this.resource("instruments", function(){
 		this.resource("instrument", { path: "/:instrument_id" }, function(){
 			this.route("create");
 			this.route("edit");
