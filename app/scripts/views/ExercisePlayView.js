@@ -4,11 +4,7 @@ GuitarTrainer.ExercisePlayView = Ember.View.extend({
 	didInsertElement: function(){
 		this._super();
 
-		var canvas = document.createElement("canvas");
-		canvas.id = "canvas";
-		canvas.width = 1250;
-		canvas.height = 100;
-		document.getElementById("mainThing").appendChild(canvas);
+		var canvas = this.$("#spectrogram");
 
 		var pitchDetectionNode = GuitarTrainer.VisualPitchDetectionNode.create({
 			canvas: canvas
