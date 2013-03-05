@@ -100,7 +100,17 @@ GuitarTrainer.InstrumentPlayController = Ember.ObjectController.extend({
 	},
 
 	noteAtCoordinates: function(stringIndex, fretIndex){
-		return this.get("strings")[stringIndex].get("notes")[fretIndex];
+		var strings = this.get("strings");
+		if(stringIndex >= strings.length){
+			console.log("stringIndex out of range");
+			return null;
+		}
+		var string = strings[stringIndex];
+		if(fretIndex >= string.get("numFrets")){
+			console.log("fretIndex out of range");
+			return null;
+		}
+		return string.get("notes")[fretIndex];
 	}
 });
 
