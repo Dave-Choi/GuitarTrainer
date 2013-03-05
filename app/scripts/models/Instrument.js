@@ -38,21 +38,30 @@ GuitarTrainer.String = Ember.Object.extend({
 	with different defaults for different instruments or tunings.
 */
 
-GuitarTrainer.InstrumentPlayController = Ember.ObjectController.extend({
+GuitarTrainer.Instrument = DS.Model.extend({
+	name: DS.attr("string"),
+	tuning: DS.attr("object"),
+	exercises: DS.hasMany("GuitarTrainer.Exercise"),
+
 	strings: function(){
 		/*
 			Array of GuitarTrainer.String objects.
 			Any disparity between string fret counts imply they are shifted down toward the bridge
 			e.g. The banjo's 5th string is 5 frets shorter than the rest.
 		*/
-		var stringsData = this.get("content.tuning.strings");
+		var stringsData = this.get("tuning.strings");
+		if(!stringsData){
+			// Why is this happening?
+			console.log("strings data not present");
+			return [];
+		}
 		var strings = [];
 		var numStrings = stringsData.length;
 		for(var i=0; i<numStrings; i++){
 			var stringData = stringsData[i];
 
 			var note = DMusic.Note.create({
-				root: stringData.root.name,
+				name: stringData.root.name,
 				octave: stringData.root.octave
 			});
 
@@ -62,15 +71,14 @@ GuitarTrainer.InstrumentPlayController = Ember.ObjectController.extend({
 			});
 			strings.push(string);
 		}
-		console.log(strings);
 		return strings;
-	}.property("content.tuning.strings.@each"),
+	}.property("tuning.strings.@each"),
 
-	contentChanged: function(){
-		console.log(this.get("content"));
-	}.observes("content"),
+	tuningNotes: function(){
+		//	Array of root notes for the strings
+		return this.get("strings").getEach("root");
+	}.property("strings.@each.root"),
 
-	// tuning: [],	//	Array of root notes for the strings
 	stringLengths: function(){
 		return this.get("strings").getEach("numFrets");
 	}.property("strings.@each.numFrets"),
@@ -78,26 +86,6 @@ GuitarTrainer.InstrumentPlayController = Ember.ObjectController.extend({
 	totalLength: function(){
 		return Math.max.apply(null, this.get("stringLengths"));
 	}.property("strings.@each.numFrets"),
-
-	// init: function(){
-	// 	console.log("InstrumentPlayController init");
-	// 	console.log(this.get("content.tuning.notes"));
-	// 	this._super();
-	// 	var strings = [];
-	// 	var tuning = this.get("tuning");
-	// 	var stringLengths = this.get("stringLengths");
-	// 	var i, len = tuning.length;
-	// 	for(i=0; i<len; i++){
-	// 		var stringLen = stringLengths[i];
-	// 		var string = GuitarTrainer.String.create({root: tuning[i], numFrets: stringLen});
-	// 		strings.push(string);
-	// 	}
-	// 	this.set("strings", strings);
-	// },
-
-	init: function(){
-		console.log("instrument play controller init");
-	},
 
 	noteAtCoordinates: function(stringIndex, fretIndex){
 		var strings = this.get("strings");
@@ -112,12 +100,6 @@ GuitarTrainer.InstrumentPlayController = Ember.ObjectController.extend({
 		}
 		return string.get("notes")[fretIndex];
 	}
-});
-
-GuitarTrainer.Instrument = DS.Model.extend({
-	name: DS.attr("string"),
-	tuning: DS.attr("object"),
-	exercises: DS.hasMany("GuitarTrainer.Exercise")
 });
 
 GuitarTrainer.Instrument.FIXTURES = [
@@ -174,7 +156,7 @@ GuitarTrainer.Instrument.FIXTURES = [
 						octave: 4
 					},
 					numFrets: 24
-				},
+				}
 			]
 		}
 	}
