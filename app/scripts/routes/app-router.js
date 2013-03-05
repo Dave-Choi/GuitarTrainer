@@ -34,8 +34,6 @@ GuitarTrainer.ExercisePlayRoute = Ember.Route.extend({
 		var exerciseModel = this.modelFor("exercise");
 		// This buys me access to the model's properties via their name only in the template.
 		controller.set("content", exerciseModel);
-
-		this.controllerFor("instrument.play").set("content", exerciseModel.get("instrument"));
 	}
 });
 
