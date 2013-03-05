@@ -42,8 +42,8 @@ GuitarTrainer.ExerciseGraph = DS.Model.extend({
 
 
 GuitarTrainer.ExerciseNode = DS.Model.extend({
-	section: DS.hasMany("GuitarTrainer.ExerciseTransition"),
-	transitions: null,
+	section: DS.belongsTo("GuitarTrainer.Section"),
+	transitions: DS.hasMany("GuitarTrainer.ExerciseTransition"),
 
 	init: function(){
 		this.set("transitions", this.get("transitions") || []);
@@ -81,8 +81,8 @@ GuitarTrainer.ExerciseNode = DS.Model.extend({
 });
 
 GuitarTrainer.ExerciseTransition = DS.Model.extend({
-	sourceNode: null,
-	targetNode: null,
+	sourceNode: DS.belongsTo("GuitarTrainer.ExerciseNode"),
+	targetNode: DS.belongsTo("GuitarTrainer.ExerciseNode"),
 
 	shouldTransition: function(){
 		return true;
