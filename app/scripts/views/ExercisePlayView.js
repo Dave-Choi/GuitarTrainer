@@ -5,12 +5,28 @@ GuitarTrainer.ExercisePlayView = Ember.View.extend({
 		this._super();
 	},
 
+	domReady: false,
+	modelsReady: false,
+
+	allReady: function(){
+		if(this.get("domReady") && this.get("modelsReady")){
+			this.setupGame();
+		}
+	}.observes("domReady", "modelsReady"),
+
 	didInsertElement: function(){
 		this._super();
+		this.set("domReady", true);
+	},
 
-		// console.log(this.get("controller.instrument.tuning.notes")[1].name);  // This access chain works.
+	controllerReady: function(){
+		if(this.get("controller.modelsLoaded")){
+			this.set("modelsReady", true);
+		}
+	}.observes("controller.modelsLoaded"),
 
-		var instrument = this.get("controller").controllerFor("instrument.play"); // This is almost certainly terrible.
+	setupGame: function(){
+		var instrument = this.get("controller.instrument");
 
 		var canvas = this.$("#spectrogram")[0];
 
