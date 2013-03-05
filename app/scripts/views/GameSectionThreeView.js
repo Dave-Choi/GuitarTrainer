@@ -1,4 +1,4 @@
-GuitarTrainer.SectionThreeView = GuitarTrainer.ThreeView.extend({
+GuitarTrainer.GameSectionThreeView = GuitarTrainer.ThreeView.extend({
 	init: function(){
 		this._super();
 		var section = this.get("model");

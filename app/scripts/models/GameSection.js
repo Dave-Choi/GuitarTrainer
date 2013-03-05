@@ -1,17 +1,17 @@
 /*
 	Represents a playable exercise section.
 
-	Section inherits from GuitarTrainer.Target, and may be treated as such, with respect
+	GameSection inherits from GuitarTrainer.Target, and may be treated as such, with respect
 	to when to listen, etc.
 
 	Consists of an array of Targets, and basic methods to aggregate over them efficiently.
 
-	Section handles triggering methods on Target objects,
+	GameSection handles triggering methods on Target objects,
 	such as calling their listen() methods, at appropriate times,
 	depending on track location.
 */
 
-GuitarTrainer.Section = GuitarTrainer.Target.extend({
+GuitarTrainer.GameSection = GuitarTrainer.Target.extend({
 	pitchDetectionNode: null,
 	targets: null,
 
@@ -20,7 +20,7 @@ GuitarTrainer.Section = GuitarTrainer.Target.extend({
 
 	startTime: function(){
 		/*
-			Returns the time (ms) when this Section needs to start listening, which
+			Returns the time (ms) when this GameSection needs to start listening, which
 			will be when its first target needs to start listening.
 
 			Targets are kept sorted by startTime for some performance optimizations,
@@ -80,7 +80,7 @@ GuitarTrainer.Section = GuitarTrainer.Target.extend({
 
 	offsetCopy: function(offsetInMilliseconds){
 		/*
-			Returns a copy of this Section, but with all of its targets time shifted.
+			Returns a copy of this GameSection, but with all of its targets time shifted.
 			This is useful for repeated sections in songs.
 
 			Recommended use is to create master sections in isolation, with the first target
@@ -162,4 +162,4 @@ GuitarTrainer.Section = GuitarTrainer.Target.extend({
 	}.observes("timingController.scaledTime")
 });
 
-GuitarTrainer.Section.reopen(GuitarTrainer.Renderable("Section"));
+GuitarTrainer.GameSection.reopen(GuitarTrainer.Renderable("GameSection"));

@@ -1,4 +1,4 @@
-GuitarTrainer.SectionTablatureView = GuitarTrainer.Canvas2DView.extend({
+GuitarTrainer.GameSectionTablatureView = GuitarTrainer.Canvas2DView.extend({
 	views: function(){
 		var generatedViews = [];
 		var section = this.get("model");

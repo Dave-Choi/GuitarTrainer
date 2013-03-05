@@ -138,17 +138,17 @@ GuitarTrainer.ExercisePlayView = Ember.View.extend({
 		var scaleUpTargets = evenTempoSection(AMajorScaleCoordinates, 1000);
 		var scaleDownTargets = evenTempoSection(AMajorScaleCoordinates.reverse(), 1000);
 
-		var scaleUpSection = GuitarTrainer.Section.create({
+		var scaleUpSection = GuitarTrainer.GameSection.create({
 			pitchDetectionNode: pitchDetectionNode,
 			targets: scaleUpTargets
 		});
 
-		var scaleDownSection = GuitarTrainer.Section.create({
+		var scaleDownSection = GuitarTrainer.GameSection.create({
 			pitchDetectionNode: pitchDetectionNode,
 			targets: scaleDownTargets
 		});
 
-		var masterSection = GuitarTrainer.Section.create({
+		var masterSection = GuitarTrainer.GameSection.create({
 			pitchDetectionNode: pitchDetectionNode
 		});
 
