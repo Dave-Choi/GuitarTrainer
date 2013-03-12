@@ -64,7 +64,7 @@ GuitarTrainer.ExerciseNode = DS.Model.extend({
 	},
 
 	addTransition: function(transition){
-		thsi.get("transitions").push(transition);
+		this.get("transitions").push(transition);
 	},
 
 	nextNode: function(){
