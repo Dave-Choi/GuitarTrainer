@@ -14,7 +14,6 @@ GuitarTrainer.ExerciseGraph = DS.Model.extend({
 
 	init: function(){
 		this._super();
-		this.set("nodes", this.get("nodes") || []);
 	},
 
 	addNode: function(node){
@@ -44,10 +43,6 @@ GuitarTrainer.ExerciseGraph = DS.Model.extend({
 GuitarTrainer.ExerciseNode = DS.Model.extend({
 	section: DS.belongsTo("GuitarTrainer.Section"),
 	transitions: DS.hasMany("GuitarTrainer.ExerciseTransition"),
-
-	init: function(){
-		this.set("transitions", this.get("transitions") || []);
-	},
 
 	addNewTransition: function(node, condition){
 		if(!condition){
