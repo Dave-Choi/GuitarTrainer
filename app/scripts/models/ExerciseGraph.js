@@ -76,7 +76,6 @@ GuitarTrainer.ExerciseNode = DS.Model.extend({
 });
 
 GuitarTrainer.ExerciseTransition = DS.Model.extend({
-	sourceNode: DS.belongsTo("GuitarTrainer.ExerciseNode"),
 	targetNode: DS.belongsTo("GuitarTrainer.ExerciseNode"),
 
 	shouldTransition: function(){
