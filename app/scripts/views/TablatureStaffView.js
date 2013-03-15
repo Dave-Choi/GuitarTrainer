@@ -14,6 +14,8 @@ GuitarTrainer.TablatureStaffView = GuitarTrainer.Canvas2DView.extend({
 	cursorPadding: 60,
 	fontSize: 12,
 
+	shouldDrawCursor: true,
+
 	textLinePosition: function(stringIndex){
 		// Returns the Y posiiton for text to be aligned with a string
 		var lineSpacing = this.get("lineSpacing");
@@ -51,6 +53,9 @@ GuitarTrainer.TablatureStaffView = GuitarTrainer.Canvas2DView.extend({
 	},
 
 	drawCursor: function(context){
+		if(!this.get("shouldDrawCursor")){
+			return;
+		}
 		var lineSpacing = this.get("lineSpacing");
 		var labelPadding = this.get("labelPadding");
 		var instrument = this.get("instrument");
