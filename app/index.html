@@ -133,7 +133,7 @@
                             {{name}} ({{partial "instrumentTuning"}})
                         {{/with}}
                 </header>
-                Graph preview here.
+                {{partial "graphConfiguration"}}
             </section>
             {{outlet}}
         </script>
@@ -188,6 +188,34 @@
                 {{partial "instrumentTuning"}}
             </section>
             {{outlet}}
+        </script>
+
+        <script type="text/x-handlebars" data-template-name="sectionTablatureBrief">
+            <canvas width="300" height="100" style="border: solid red 1px;">
+            </canvas>
+        </script>
+
+        <script type="text/x-handlebars" data-template-name="_graphConfiguration">
+            <section>
+                Note: Section preview tablature is time-compressed to show content.
+                {{#each node in graph.nodes}}
+                    <li>{{node.id}} - {{view "GuitarTrainer.SectionTablatureBriefView" contentBinding="node.section"}}
+                        <ol>
+                            {{#each transition in node.transitions}}
+                                <li>
+                                    transition to node {{transition.targetNode.id}} when {{transition.attributeName}} {{transition.comparator}} {{transition.referenceValue}}
+                                </li>
+                            {{/each}}
+                        </ol>
+                    </li>
+                {{/each}}
+            </section>
+        </script>
+
+        <script type="text/x-handlebars" data-template-name="sections/index">
+            {{#each section in controller}}
+                <li>section </li>
+            {{/each}}
         </script>
 
     </body>
