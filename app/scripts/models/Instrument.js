@@ -109,7 +109,7 @@ GuitarTrainer.Instrument.FIXTURES = [
 		tuning: {
 			strings: [ /*
 				This array was originally the value of tuning, but because of the DS.attr("object")
-				specification on the mdoel, it was breaking in some templates to try to use the
+				specification on the model, it was breaking in some templates to try to use the
 				#each helper to iterate over these objects.
 
 				It worked okay when using the instrument route, but when trying to embed, via partials
