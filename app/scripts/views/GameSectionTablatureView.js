@@ -12,7 +12,7 @@ GuitarTrainer.GameSectionTablatureView = GuitarTrainer.Canvas2DView.extend({
 			});
 			generatedViews.push(targetTablatureView);
 		}
-		
+
 		return generatedViews;
 	}.property("model.targets.@each"),
 
