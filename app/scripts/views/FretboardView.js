@@ -12,21 +12,6 @@ GuitarTrainer.FretboardView = Ember.Object.extend({
 	stringSpacing: 0.55, // Vertical space between strings
 	dotFrets:  [3, 5, 7, 9, 12, 15, 17, 19, 21, 24],
 
-	// These colors and orientation reflect the Rocksmith string coloring
-	stringColors: [0xff0000, 0xffff00, 0x0000ff, 0xff8800, 0x00ff00, 0xff00ff],
-	stringColorsHex: function(){
-		var stringColors = this.get("stringColors");
-		var hexColors = [];
-		var len = stringColors.length;
-		for(var i=0; i<len; i++){
-			var color = stringColors[i];
-			var unpaddedHexString = color.toString(16);
-			var paddedHexString = ("000000" + unpaddedHexString).slice(-6);
-			hexColors.push(paddedHexString);
-		}
-		return hexColors;
-	}.property("stringColors.@each"),
-
 	flipped: true,  // If flipped is true, the red (low E) string is shown on top, mirroring a right handed guitar
 
 	// Can be configured to use different string views,
@@ -45,7 +30,7 @@ GuitarTrainer.FretboardView = Ember.Object.extend({
 		var k = Math.pow(2, 1/12);
 		var divisor = 1;
 		var stringLength = this.get("stringLength");
-		var numFrets = this.get("instrument").get("totalLength");
+		var numFrets = this.get("instrument.totalLength");
 		var positions = [];
 
 		for(var i=0; i<=numFrets; i++){
@@ -60,7 +45,7 @@ GuitarTrainer.FretboardView = Ember.Object.extend({
 		var stringSpacing = this.get("stringSpacing");
 		var flipped = this.get("flipped");
 		var positions = [];
-		var numStrings = this.get("instrument").get("strings").length;
+		var numStrings = this.get("instrument.strings").length;
 		for(var i=0; i<numStrings; i++){
 			if(flipped){
 				positions.push((numStrings - i) * stringSpacing);
