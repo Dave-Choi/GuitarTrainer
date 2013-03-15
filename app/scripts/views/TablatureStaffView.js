@@ -39,8 +39,7 @@ GuitarTrainer.TablatureStaffView = GuitarTrainer.Canvas2DView.extend({
 	},
 
 	drawStaff: function(context){
-		var fretboardView = GuitarTrainer.Fretboard;
-		var colors = fretboardView.get("stringColorsHex");
+		var colors = this.get("instrument.stringColorsHex");
 		var width = context.canvas.width;
 		var lineSpacing = this.get("lineSpacing");
 		var labelPadding = this.get("labelPadding");
