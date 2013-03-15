@@ -25,7 +25,7 @@ GuitarTrainer.TablatureStaffView = GuitarTrainer.Canvas2DView.extend({
 	},
 
 	drawStringLabels: function(context){
-		var notes = this.get("instrument").get("tuningNotes");
+		var notes = this.get("instrument.tuningNotes");
 		var lineSpacing = this.get("lineSpacing");
 		var fontSize = this.get("fontSize");
 
