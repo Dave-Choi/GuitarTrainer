@@ -4,6 +4,7 @@ GuitarTrainer.String = Ember.Object.extend({
 	root: DMusic.Note.create(),
 	numFrets: 22,
 	notes: null,
+	color: 0xffffff,
 
 	init: function(){
 		this._super();
@@ -67,7 +68,8 @@ GuitarTrainer.Instrument = DS.Model.extend({
 
 			var string = GuitarTrainer.String.create({
 				root: note,
-				numFrets: stringData.numFrets
+				numFrets: stringData.numFrets,
+				color: stringData.color
 			});
 			strings.push(string);
 		}
@@ -86,6 +88,23 @@ GuitarTrainer.Instrument = DS.Model.extend({
 	totalLength: function(){
 		return Math.max.apply(null, this.get("stringLengths"));
 	}.property("strings.@each.numFrets"),
+
+	stringColors: function(){
+		return this.get("strings").getEach("color");
+	}.property("strings.@each.color"),
+
+	stringColorsHex: function(){
+		var stringColors = this.get("stringColors");
+		var hexColors = [];
+		var len = stringColors.length;
+		for(var i=0; i<len; i++){
+			var color = stringColors[i];
+			var unpaddedHexString = color.toString(16);
+			var paddedHexString = ("000000" + unpaddedHexString).slice(-6);
+			hexColors.push(paddedHexString);
+		}
+		return hexColors;
+	}.property("stringColors.@each"),
 
 	noteAtCoordinates: function(stringIndex, fretIndex){
 		var strings = this.get("strings");
@@ -114,48 +133,60 @@ GuitarTrainer.Instrument.FIXTURES = [
 
 				It worked okay when using the instrument route, but when trying to embed, via partials
 				template helpers, it would complain about an object when it expected an array.
+
+				The string objects also have color information.  I'd originally wanted to keep this
+				separate from the model in a user settings object, but having some sort of global config
+				runs into trouble if you're using different instruments that have different numbers of strings.
+
+				These string colors reflect the Rocksmith string coloring.
 				*/
 				{
 					root: {
 						name: "E",
 						octave: 2
 					},
-					numFrets: 24
+					numFrets: 24,
+					color: 0xff0000
 				},
 				{
 					root: {
 						name: "A",
 						octave: 2
 					},
-					numFrets: 24
+					numFrets: 24,
+					color: 0xffff00
 				},
 				{
 					root: {
 						name: "D",
 						octave: 3
 					},
-					numFrets: 24
+					numFrets: 24,
+					color: 0x0000ff
 				},
 				{
 					root: {
 						name: "G",
 						octave: 3
 					},
-					numFrets: 24
+					numFrets: 24,
+					color: 0xff8800
 				},
 				{
 					root: {
 						name: "B",
 						octave: 3
 					},
-					numFrets: 24
+					numFrets: 24,
+					color: 0x00ff00
 				},
 				{
 					root: {
 						name: "E",
 						octave: 4
 					},
-					numFrets: 24
+					numFrets: 24,
+					color: 0xff00ff
 				}
 			]
 		}
