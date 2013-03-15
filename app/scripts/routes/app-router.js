@@ -5,6 +5,12 @@ GuitarTrainer.Router.map(function(){
 			this.route("edit");
 			this.route("play");
 			this.route("listen");
+
+			this.resource("sections", function(){
+				this.resource("section", { path: "/:section_id" }, function(){
+					
+				});
+			});
 		});
 	});
 	this.resource("instruments", function(){
@@ -34,6 +40,14 @@ GuitarTrainer.ExercisePlayRoute = Ember.Route.extend({
 		var exerciseModel = this.modelFor("exercise");
 		// This buys me access to the model's properties via their name only in the template.
 		controller.set("content", exerciseModel);
+	}
+});
+
+GuitarTrainer.SectionsIndexController = Ember.ArrayController.extend();
+
+GuitarTrainer.SectionsIndexRoute = Ember.Route.extend({
+	model: function(){
+		return GuitarTrainer.Section.find();
 	}
 });
 
